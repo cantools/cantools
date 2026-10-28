@@ -135,10 +135,7 @@ def _merge_definitions(
     for name, definition in incoming.items():
         if name in definitions:
             previous = definitions[name]
-            if (previous.kind, previous.type_name, previous.minimum,
-                previous.maximum, previous.choices, previous.default_value) != (
-                    definition.kind, definition.type_name, definition.minimum,
-                    definition.maximum, definition.choices, definition.default_value):
+            if definition != previous:
                 raise Error(f'Incompatible DBC attribute definition {name!r}.')
         else:
             definitions[name] = definition

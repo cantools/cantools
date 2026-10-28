@@ -1,5 +1,6 @@
 import logging
 from collections import OrderedDict
+from copy import copy
 from typing import (
     Any,
     TextIO,
@@ -48,8 +49,8 @@ class Database:
     bus properties take precedence. Incoming global attributes, value tables
     and environment variables replace entries with the same key. DBC attribute
     definitions, including defaults and relation definitions, must agree;
-    otherwise ``cantools.database.errors.Error`` is raised before adding
-    anything. Messages are appended and duplicate message lookups use the
+    otherwise ``cantools.database.errors.Error`` is raised.
+    Messages are appended and duplicate message lookups use the
     latest message. The version is replaced by the incoming version.
     """
 
@@ -439,7 +440,17 @@ class Database:
                                        else previous_bus.autosar))
             buses[bus.name] = bus
 
-        self._add_messages(database.messages)
+        # Stage messages and lookups too: a late failure must not expose a
+        # partial addition while retaining the old metadata.
+        candidate = copy(self)
+        candidate._messages = self._messages.copy()
+        candidate._name_to_message = self._name_to_message.copy()
+        candidate._frame_id_to_message = self._frame_id_to_message.copy()
+        candidate._add_messages(database.messages)
+
+        self._messages[:] = candidate._messages
+        self._name_to_message = candidate._name_to_message
+        self._frame_id_to_message = candidate._frame_id_to_message
         self._nodes = list(nodes.values())
         self._buses = list(buses.values())
         self._version = database.version

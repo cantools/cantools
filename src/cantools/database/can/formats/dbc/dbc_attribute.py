@@ -58,5 +58,11 @@ class DbcAttribute(Generic[DbcAttributeValueTypeVar]):
     def __repr__(self) -> str:
         return f"attribute('{self.name}', {self.value})"
 
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, DbcAttribute):
+            return NotImplemented
+
+        return self.definition == other.definition and self.value == other.value
+
 
 DbcAttributeType = DbcAttribute[str] | DbcAttribute[int] | DbcAttribute[float]

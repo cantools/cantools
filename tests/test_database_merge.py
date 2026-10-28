@@ -1,6 +1,7 @@
 import pickle
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 from xml.etree import ElementTree
 
 import textparser  # type: ignore
@@ -8,6 +9,11 @@ from parameterized import parameterized  # type: ignore
 
 import cantools.database
 from cantools.database.can.bus import Bus
+from cantools.database.can.database import Database
+from cantools.database.can.formats.dbc import (
+    DbcAttribute,
+    DbcAttributeDefinition,
+)
 from cantools.database.can.node import Node
 from cantools.database.errors import Error
 
@@ -68,6 +74,36 @@ Var=AddedSignal unsigned 0,8
 
 
 class DatabaseMetadataMergeTest(unittest.TestCase):
+    def test_message_addition_failure_leaves_database_unchanged(self):
+        database = cantools.database.load_string(dbc_source(), 'dbc')
+        original_messages = database.messages
+        original_specifics = database.dbc
+        before = pickle.dumps(database)
+        add_message = Database._add_message
+        calls = 0
+
+        def fail_second_addition(target, message):
+            nonlocal calls
+            calls += 1
+            if calls == 2:
+                raise Error('message addition failed')
+            add_message(target, message)
+
+        incoming = (dbc_source('Added', 1794, 'second') +
+                    'BO_ 1795 AnotherMessage: 0 AddedNode\n')
+        with (patch.object(Database, '_add_message', fail_second_addition),
+              self.assertRaisesRegex(Error, 'message addition failed')):
+            database.add_dbc_string(incoming)
+
+        self.assertEqual(calls, 2)
+        self.assertEqual(pickle.dumps(database), before)
+        self.assertIs(database.messages, original_messages)
+        self.assertIs(database.dbc, original_specifics)
+        self.assertEqual([message.name for message in original_messages],
+                         ['OriginalMessage'])
+        with self.assertRaises(KeyError):
+            database.get_message_by_name('AddedMessage')
+
     def assert_original_metadata(self, database):
         self.assertIn('OriginalNode', [node.name for node in database.nodes])
         self.assertIn('OriginalBus', [bus.name for bus in database.buses])
@@ -349,9 +385,11 @@ EV_ AddedEnvironment: 0 [0|50] "" 0 2 DUMMY_NODE_VECTOR0 AddedNode;
 
     def test_message_append_and_lookup_policy(self):
         database = cantools.database.load_string(added_source('dbc'), 'dbc')
+        original_messages = database.messages
         original = database.messages[0]
         database.add_dbc_string(added_source('dbc'))
         self.assertEqual(len(database.messages), 2)
+        self.assertIs(database.messages, original_messages)
         self.assertIs(database.messages[0], original)
         self.assertIs(database.get_message_by_frame_id(1794), database.messages[1])
         self.assertIs(database.get_message_by_name('AddedMessage'),
@@ -370,3 +408,40 @@ EV_ AddedEnvironment: 0 [0|50] "" 0 2 DUMMY_NODE_VECTOR0 AddedNode;
         with self.assertRaises(exception):
             getattr(database, f'add_{database_format}_string')('invalid input')
         self.assertEqual(pickle.dumps(database), before)
+
+
+class DbcAttributeEqualityTest(unittest.TestCase):
+    @parameterized.expand([
+        ('name', 'Other'),
+        ('default_value', 6),
+        ('kind', 'SG_'),
+        ('type_name', 'HEX'),
+        ('minimum', 1),
+        ('maximum', 99),
+        ('choices', ['a', 'c']),
+    ])
+    def test_definition_equality_compares_all_fields(self, field, value):
+        values = {'name': 'Shared', 'default_value': 5, 'kind': 'BO_',
+                  'type_name': 'INT', 'minimum': 0, 'maximum': 100,
+                  'choices': ['a', 'b']}
+        definition = DbcAttributeDefinition(**values)
+        self.assertEqual(definition, DbcAttributeDefinition(**values))
+        values[field] = value
+        self.assertNotEqual(definition, DbcAttributeDefinition(**values))
+
+    def test_attribute_equality_compares_value_and_definition(self):
+        original = DbcAttribute(5, DbcAttributeDefinition('Shared'))
+        self.assertEqual(original,
+                         DbcAttribute(5, DbcAttributeDefinition('Shared')))
+        self.assertNotEqual(original,
+                            DbcAttribute(6, DbcAttributeDefinition('Shared')))
+        self.assertNotEqual(original,
+                            DbcAttribute(5, DbcAttributeDefinition('Other')))
+
+    def test_unrelated_objects_are_not_equal(self):
+        definition = DbcAttributeDefinition('Shared')
+        attribute = DbcAttribute(5, definition)
+        for value in (None, 'Shared', 5, object()):
+            with self.subTest(value=value):
+                self.assertNotEqual(definition, value)
+                self.assertNotEqual(attribute, value)

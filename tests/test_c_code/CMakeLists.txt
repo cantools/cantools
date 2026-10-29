@@ -39,6 +39,10 @@ execute_process(COMMAND cantools generate_c_source --database-name signed_bit_fi
                 WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
 execute_process(COMMAND cantools generate_c_source --database-name open_actuator_node_sensor --node Sensor ../files/dbc/open_actuator.dbc 
                 WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
+execute_process(COMMAND cantools generate_c_source ../files/dbc/c_keyword_signal_names.dbc
+                WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
+execute_process(COMMAND cantools generate_c_source --database-name c_keyword_signal_names_bit_fields --bit-fields ../files/dbc/c_keyword_signal_names.dbc
+                WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
 
 # fetch unity test framework
 add_subdirectory(test_framework)
@@ -61,7 +65,9 @@ set(SOURCES
     motohawk_bit_fields.c
     floating_point_bit_fields.c
     signed_bit_fields.c
-    open_actuator_node_sensor.c)
+    open_actuator_node_sensor.c
+    c_keyword_signal_names.c
+    c_keyword_signal_names_bit_fields.c)
 add_library(cantoolsGenCode ${SOURCES})
 
 # Enable all warnings for the generated source code

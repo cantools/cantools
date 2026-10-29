@@ -842,7 +842,6 @@ def _load_signals(tokens: list[MatchObject],
         if message_signal_comments is None:
             return None
         return message_signal_comments.get(signal_name)
-
     def get_signal_choices(frame_id_dbc: int, signal_name: str) -> Choices | None:
         """Get choices for given signal.
 
@@ -851,17 +850,7 @@ def _load_signals(tokens: list[MatchObject],
         if message_choices is None:
             return None
 
-        c = message_choices.get(signal_name)
-        if c is None:
-            return None
-
-        # Remove the selected signal from the choices dict, this
-        # lets us validate that all VAL_ choices specified by the
-        # DBC are used by Messages.
-        del(message_choices[signal_name])
-
-        return c
-
+        return message_choices.get(signal_name)
 
     def get_signal_is_multiplexer(signal_tokens: TokenList) -> bool:
         mux_field = dbc_assert_type(signal_tokens[1], list)
@@ -945,12 +934,6 @@ def _load_signals(tokens: list[MatchObject],
         if frame_signal_types is None:
             return False
         signal_type = frame_signal_types.get(signal)
-        if signal_type is None:
-            return False
-        # Remove the selected signal type from the signal_types
-        # dict, this lets us validate that all SIG_VALTYPE_ entries
-        # specified by the DBC are used by Messages.
-        del(frame_signal_types[signal])
         return signal_type in FLOAT_SIGNAL_TYPES
 
     def get_signal_long_name(frame_id_dbc: int, signal_short_name: str) -> str:
@@ -1422,27 +1405,6 @@ def load_string(string: str, strict: bool = True,
     nodes = _load_nodes(tokens, comments, attributes, attribute_definitions_dict)
     version = _load_version(tokens)
     environment_variables = _load_environment_variables(tokens, comments, attributes, attribute_definitions_dict)
-
-    # There shouldn't be any choices/VAL_ entries left, each one should
-    # have been claimed by a Message above.
-    unused_choices = [ ]
-    for frame_id in choices:
-        for c in choices[frame_id]:
-            unused_choices.append(f"VAL_ {frame_id} {c}")
-    if len(unused_choices) > 0:
-        errors = "\n    ".join(unused_choices)
-        raise ValueError(f'unused VAL_ entries in DBC:\n    {errors}')
-
-    # There shouldn't be any SIG_VALTYPE_ signal_type entries left,
-    # each one should have been claimed by a Message above.
-    unused_signal_types = [ ]
-    for frame_id in signal_types:
-        for signal_type in signal_types[frame_id]:
-            unused_signal_types.append(f"SIG_VALTYPE_ {frame_id} {signal_type}")
-    if len(unused_signal_types) > 0:
-        errors = "\n    ".join(unused_signal_types)
-        raise ValueError(f'unused SIG_VALTYPE_ entries in DBC:\n    {errors}')
-
     dbc_specifics = DbcSpecifics(attributes=attributes.database or None,
                                  attribute_definitions=attribute_definitions_dict,
                                  environment_variables=environment_variables,

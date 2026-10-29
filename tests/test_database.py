@@ -1874,6 +1874,76 @@ BA_DEF_ BO_ "VFrameFormat" ENUM "StandardCAN","ExtendedCAN","J1939PG";
         self.assertEqual(message.comment, 'First lineSecond line')
         self.assertEqual(message.signals[0].comment, 'AlphaBeta')
 
+    def test_kcd_signal_in_several_mux_groups(self):
+        """A signal listed with the same definition in the MuxGroup of
+        each of its multiplexer ids is loaded as one signal with all of
+        these ids.
+
+        """
+
+        def load(mux_groups):
+            return cantools.database.load_string(
+                '<NetworkDefinition '
+                'xmlns="http://kayak.2codeornot2code.org/1.0">'
+                '  <Bus name="Bus1">'
+                '    <Message id="1" name="Message1" length="8">'
+                '      <Multiplex name="Mux" offset="0" length="8">'
+                + mux_groups +
+                '      </Multiplex>'
+                '    </Message>'
+                '  </Bus>'
+                '</NetworkDefinition>',
+                database_format='kcd',
+                strict=False).messages[0]
+
+        def ids(message, name):
+            return [signal.multiplexer_ids
+                    for signal in message.signals
+                    if signal.name == name]
+
+        # Same definition, written out and with KCD's defaults.
+        message = load(
+            '<MuxGroup count="1"><Signal name="X" offset="8"/></MuxGroup>'
+            '<MuxGroup count="2"><Signal name="Y" offset="16"/></MuxGroup>'
+            '<MuxGroup count="3">'
+            '  <Signal name="X" offset="8" length="1" endianess="little">'
+            '    <Value type="unsigned" slope="1" intercept="0"/>'
+            '  </Signal>'
+            '</MuxGroup>')
+        self.assertEqual(ids(message, 'X'), [[1, 3]])
+        self.assertEqual(ids(message, 'Y'), [[2]])
+        self.assertEqual(message.signal_tree,
+                         [{'Mux': {1: ['X'], 2: ['Y'], 3: ['X']}}])
+        self.assertEqual(message.decode(b'\x03\x01' + 6 * b'\x00'),
+                         {'Mux': 3, 'X': 1})
+
+        # Different definitions stay separate signals.
+        message = load(
+            '<MuxGroup count="1"><Signal name="X" offset="8"/></MuxGroup>'
+            '<MuxGroup count="2"><Signal name="X" offset="16"/></MuxGroup>')
+        self.assertEqual(ids(message, 'X'), [[1], [2]])
+
+        # So do all listings of a name if only some of them are equal.
+        message = load(
+            '<MuxGroup count="1"><Signal name="X" offset="8"/></MuxGroup>'
+            '<MuxGroup count="2">'
+            '  <Signal name="X" offset="8"><Value slope="2"/></Signal>'
+            '</MuxGroup>'
+            '<MuxGroup count="3"><Signal name="X" offset="8"/></MuxGroup>')
+        self.assertEqual(ids(message, 'X'), [[1], [2], [3]])
+
+        # And a name listed twice under the same id.
+        message = load(
+            '<MuxGroup count="1">'
+            '  <Signal name="X" offset="8"/>'
+            '  <Signal name="X" offset="8"/>'
+            '</MuxGroup>')
+        self.assertEqual(ids(message, 'X'), [[1], [1]])
+
+        db = cantools.database.load_file('tests/files/kcd/the_homer.kcd')
+        message = db.get_message_by_name('Radio')
+        self.assertEqual(ids(message, 'StationId7'), [[6, 7]])
+
     def test_jopp_5_0_sym(self):
         db = cantools.database.Database()
 
@@ -4397,6 +4467,29 @@ BA_DEF_ BO_ "VFrameFormat" ENUM "StandardCAN","ExtendedCAN","J1939PG";
                                             database_format='kcd')
         self.assertEqual(kcd.get_message_by_name('Msg1').senders,
                          ['ECU', 'Peripherals'])
+
+    def test_as_kcd_string_signal_in_several_mux_groups(self):
+        """A signal multiplexed under several ids is written to the
+        MuxGroup of each id and keeps all of them in a KCD round trip.
+
+        """
+
+        db = cantools.database.load_file('tests/files/dbc/bus_comment.dbc')
+        db = cantools.database.load_string(db.as_kcd_string(),
+                                           database_format='kcd')
+        message = db.get_message_by_name('Message1')
+        self.assertEqual([signal.name for signal in message.signals].count('BIT_J'),
+                         1)
+        self.assertEqual(message.get_signal_by_name('BIT_J').multiplexer_ids,
+                         [8, 16, 24])
+        self.assertEqual(message.decode(b'\x40\x00\x8c' + 5 * b'\x00'),
+                         {
+                             'Multiplexor': 16,
+                             'BIT_J': 1,
+                             'BIT_C': 1,
+                             'BIT_G': 1,
+                             'BIT_L': 0
+                         })
 
     def test_issue_62(self):
         """Test issue 62.

@@ -2213,6 +2213,39 @@ BA_DEF_ BO_ "VFrameFormat" ENUM "StandardCAN","ExtendedCAN","J1939PG";
                 self.assertEqual(reloaded_signal.multiplexer_ids,
                                  signal.multiplexer_ids)
 
+    def test_as_sym_string_several_multiplexers(self):
+        for filename, message_name, count in [
+                ('issue_184_extended_mux_independent_multiplexors.dbc',
+                 'ext_MUX_indep_multiplexors', 2),
+                ('issue_184_extended_mux_cascaded.dbc',
+                 'ext_MUX_cascaded', 2),
+                ('multiplex_2.dbc', 'Extended', 3),
+        ]:
+            with self.subTest(filename=filename):
+                db = cantools.database.load_file(f'tests/files/dbc/{filename}')
+
+                with self.assertRaises(ValueError) as context:
+                    db.as_sym_string()
+
+                self.assertEqual(
+                    str(context.exception),
+                    f"Message '{message_name}' has {count} multiplexer "
+                    "signals, but only one can be written to SYM.")
+
+    def test_as_sym_string_multiple_multiplexer_values(self):
+        # One multiplexer with a signal under several ids is still written.
+        db = cantools.database.load_file(
+            'tests/files/dbc/issue_184_extended_mux_multiple_values.dbc')
+        message = db.messages[0]
+
+        reloaded = cantools.database.load_string(db.as_sym_string(), 'sym')
+        reloaded_message = reloaded.get_message_by_name(message.name)
+
+        for mux in range(6):
+            data = bytes([mux, 0x11, 0x22, 0x33, 0, 0, 0, 0])
+            self.assertEqual(reloaded_message.decode(data),
+                             message.decode(data))
+
     def test_signal_types_6_0_sym(self):
         db = cantools.database.load_file('tests/files/sym/signal-types-6.0.sym')
 

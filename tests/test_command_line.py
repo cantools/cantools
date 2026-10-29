@@ -1363,6 +1363,40 @@ BATTERY_VT(
                     self.assertIn('Signal * / followed by / *', header)
                     self.assertIn('overlapping / * / sequence', header)
 
+    def test_generate_c_source_c_keyword_signal_names(self):
+        database = cantools.database.load_file(
+            'tests/files/dbc/c_keyword_signal_names.dbc')
+        header, source, _, _ = generate(database, 'kw', 'kw.h', 'kw.c',
+                                        'kw_fuzzer.c')
+
+        # Struct members that are C keywords get a trailing underscore.
+        self.assertIn('uint8_t switch_;', header)
+        self.assertIn('uint8_t default_;', header)
+        self.assertIn('uint8_t auto_;', header)
+        self.assertIn('int16_t return_;', header)
+        self.assertIn('uint8_t bool_;', header)
+        self.assertIn('switch (src_p->switch_) {', source)
+        self.assertIn('switch (dst_p->switch_) {', source)
+        self.assertIn('msg_p->auto_ = 3;', source)
+
+        # A pack or unpack variable named after a parameter gets one
+        # too; the struct member keeps its name.
+        self.assertIn('int8_t size;', header)
+        self.assertIn('uint8_t size_;', source)
+        self.assertIn('size_ = (uint8_t)src_p->size;', source)
+        self.assertIn('dst_p->size = (int8_t)size_;', source)
+        self.assertIn('if (size < 8u) {', source)
+        self.assertIn('float float_;', header)
+        self.assertIn('float dst_p;', header)
+        self.assertIn('memcpy(&dst_p_, &src_p->dst_p, sizeof(dst_p_));', source)
+        self.assertIn('memcpy(&dst_p->float_, &float_, sizeof(dst_p->float_));',
+                      source)
+
+        # Function and macro names keep the plain signal name.
+        self.assertIn('uint8_t kw_frame_default_encode(double value);', header)
+        self.assertIn('int16_t kw_frame_return_encode(double value);', header)
+        self.assertIn('#define KW_FRAME_SWITCH_NAME "Switch"', header)
+
     def test_generate_c_source_no_signal_encode_decode(self):
         databases = [
             'motohawk',

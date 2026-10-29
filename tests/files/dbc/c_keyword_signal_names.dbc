@@ -1,0 +1,29 @@
+VERSION ""
+
+
+NS_ :
+
+BS_:
+
+BU_: ECU
+
+
+BO_ 256 Frame: 8 ECU
+ SG_ Switch M : 0|8@1+ (1,0) [0|255] "" ECU
+ SG_ Size m0 : 8|8@1- (1,0) [-128|127] "" ECU
+ SG_ Default m1 : 8|8@1+ (1,0) [0|255] "" ECU
+ SG_ Auto : 16|8@1+ (1,0) [0|255] "" ECU
+ SG_ Return : 24|16@1- (1,0) [-32768|32767] "" ECU
+ SG_ Bool : 40|1@1+ (1,0) [0|1] "" ECU
+
+BO_ 257 Frame2: 8 ECU
+ SG_ Float : 0|32@1- (1,0) [0|0] "" ECU
+ SG_ DstP : 32|32@1- (1,0) [0|0] "" ECU
+
+
+
+BA_DEF_ SG_  "GenSigStartValue" INT 0 65535;
+BA_DEF_DEF_  "GenSigStartValue" 0;
+BA_ "GenSigStartValue" SG_ 256 Auto 3;
+SIG_VALTYPE_ 257 Float : 1;
+SIG_VALTYPE_ 257 DstP : 1;

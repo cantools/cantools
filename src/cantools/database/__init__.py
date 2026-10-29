@@ -76,6 +76,10 @@ def _resolve_database_format_and_encoding(database_format: str | None,
 
     return database_format, encoding
 
+# Bump when cached database objects become incompatible with the data model.
+_CACHE_VERSION = 1
+
+
 def load_file(filename: StringPathLike,
               database_format: str | None = None,
               encoding: str | None = None,
@@ -186,6 +190,7 @@ def load_file(filename: StringPathLike,
             # pickle serializer will fail anyway
             if not callable(sort_signals) or sort_signals.__module__ == 'cantools.database.utils':
                 cache_key = (
+                    _CACHE_VERSION,
                     database_format,
                     encoding,
                     frame_id_mask,

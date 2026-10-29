@@ -497,9 +497,9 @@ def _dump_senders(database: InternalDatabase) -> list[str]:
 def _dump_comments(database: InternalDatabase, sort_signals: type_sort_signals) -> list[str]:
     comment_lines: list[str] = []
 
-    for bus in database.buses:
-        if bus.comment is not None:
-            comment_lines.append(f'CM_ "{bus.comment}";')
+    if database.comment is not None:
+        escaped_comment = database.comment.replace('"', '\\"')
+        comment_lines.append(f'CM_ "{escaped_comment}";')
 
     for node in database.nodes:
         if node.comment is not None:

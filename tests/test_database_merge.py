@@ -74,6 +74,24 @@ Var=AddedSignal unsigned 0,8
 
 
 class DatabaseMetadataMergeTest(unittest.TestCase):
+    @parameterized.expand([('dbc',), ('kcd',), ('sym',), ('arxml',)])
+    def test_import_without_global_comment_preserves_existing(self, database_format):
+        database = cantools.database.Database(comment='Original')
+        getattr(database, 'add_' + database_format + '_string')(
+            added_source(database_format))
+        self.assertEqual(database.comment, 'Original')
+
+    def test_failed_import_preserves_global_comment(self):
+        database = cantools.database.load_string(dbc_source(), 'dbc')
+        database.comment = 'Original'
+        incoming = cantools.database.load_string(
+            dbc_source('Added', 1794) + 'CM_ "Incoming";\n', 'dbc')
+        with (unittest.mock.patch.object(database, '_add_messages',
+                                         side_effect=RuntimeError('failed')),
+              self.assertRaisesRegex(RuntimeError, 'failed')):
+            database._add_database(incoming)
+        self.assertEqual(database.comment, 'Original')
+
     def test_message_addition_failure_leaves_database_unchanged(self):
         database = cantools.database.load_string(dbc_source(), 'dbc')
         original_messages = database.messages
@@ -336,7 +354,7 @@ BA_ "OldNodeAttribute" BU_ OriginalNode 11;
 BA_DEF_ BU_ "NewNodeAttribute" INT 0 100;
 BA_ "NewNodeAttribute" BU_ OriginalNode 13;
 CM_ BU_ OriginalNode "second";
-CM_ "second bus";
+CM_ "database documentation";
 '''
         database.add_dbc_string(incoming)
 
@@ -349,8 +367,9 @@ CM_ "second bus";
         self.assertEqual(node.dbc.attributes['OldNodeAttribute'].value, 11)
         self.assertEqual(node.dbc.attributes['NewNodeAttribute'].value, 13)
         bus = database.get_bus_by_name('OriginalBus')
+        self.assertEqual(database.comment, 'database documentation')
         self.assertEqual(bus.comments,
-                         {None: 'second bus', 'DE': 'Bus Deutsch'})
+                         {None: 'first bus', 'DE': 'Bus Deutsch'})
         self.assertEqual((bus.baudrate, bus.fd_baudrate), (500000, 2000000))
         self.assertEqual(old_node.comments[None], 'first')
         self.assertEqual(old_bus.comments[None], 'first bus')

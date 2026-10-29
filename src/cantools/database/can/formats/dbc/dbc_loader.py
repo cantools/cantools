@@ -111,9 +111,6 @@ class DbcComments:
     # comment for the database as a whole
     database: str | None = None
 
-    # comment for the CAN bus described by the database
-    bus: str | None = None
-
     # comments for all nodes on the CAN bus:
     #     nodes[node_name] -> node_comment
     nodes: dict[str, str] = field(default_factory=dict)
@@ -444,12 +441,11 @@ def _load_comments(tokens: DbcTokens) -> DbcComments:
     for _comment_tokens in tokens.get('CM_', []):
         comment_tokens = dbc_assert_type(_comment_tokens, list)
         if not isinstance(comment_tokens[1], list):
-            # the CM_ token is a string, i.e., it is a bus comment. We
-            # implement CANdb++ behavior and concatenate all bus
-            # comments.
-            if comments.bus is None:
-                comments.bus = ''
-            comments.bus += dbc_assert_type(comment_tokens[1], str)
+            # Unqualified CM_ entries describe the entire database.
+            # Preserve CANdb++ behavior by concatenating them.
+            if comments.database is None:
+                comments.database = ''
+            comments.database += dbc_assert_type(comment_tokens[1], str)
             continue
 
         item: TokenList = comment_tokens[1]
@@ -1228,7 +1224,7 @@ def _load_version(tokens: DbcTokens) -> str | None:
     return typing.cast('str | None', dbc_assert_type(version_tokens[0], list)[1])
 
 
-def _load_bus(attributes: DbcAttributes, comments: DbcComments) -> Bus | None:
+def _load_bus(attributes: DbcAttributes) -> Bus | None:
     bus_name_attr = attributes.database.get('DBName')
     bus_name = ''
     if bus_name_attr is not None:
@@ -1239,12 +1235,10 @@ def _load_bus(attributes: DbcAttributes, comments: DbcComments) -> Bus | None:
     if bus_baudrate_attr is not None:
         bus_baudrate = int(float(bus_baudrate_attr.value))
 
-    bus_comment = comments.bus
-
-    if not any([bus_name, bus_baudrate, bus_comment]):
+    if not any([bus_name, bus_baudrate]):
         return None
 
-    return Bus(bus_name, baudrate=bus_baudrate, comment=bus_comment)
+    return Bus(bus_name, baudrate=bus_baudrate)
 
 
 def _load_nodes(tokens: DbcTokens, comments: DbcComments, attributes: DbcAttributes, attribute_definitions: OrderedDict[str, DbcAttributeDefinitionType]) -> list[Node] | None:
@@ -1379,7 +1373,7 @@ def load_string(string: str, strict: bool = True,
     attributes = _load_attributes(tokens, attribute_definitions_dict)
     relation_attribute_definitions = get_relation_definitions_dict(relation_definitions, relation_defaults)
     relation_attributes = _load_relation_attributes(tokens, relation_attribute_definitions)
-    bus = _load_bus(attributes, comments)
+    bus = _load_bus(attributes)
     value_tables = _load_value_tables(tokens)
     choices = _load_choices(tokens)
     message_senders = _load_message_senders(tokens, attributes)
@@ -1416,4 +1410,5 @@ def load_string(string: str, strict: bool = True,
                             nodes or [],
                             [bus] if bus else [],
                             version,
-                            dbc_specifics)
+                            dbc_specifics,
+                            comment=comments.database)

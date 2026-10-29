@@ -111,9 +111,6 @@ class DbcComments:
     # comment for the database as a whole
     database: str | None = None
 
-    # comment for the CAN bus described by the database
-    bus: str | None = None
-
     # comments for all nodes on the CAN bus:
     #     nodes[node_name] -> node_comment
     nodes: dict[str, str] = field(default_factory=dict)
@@ -343,7 +340,7 @@ class DbcParser(Parser):
                               Sequence('SG_', 'NUMBER', 'WORD'),
                               Sequence('BU_', 'WORD'),
                               Sequence('EV_', 'WORD'))),
-            choice('NUMBER', 'STRING'),
+            choice('NUMBER', 'WORD', 'STRING'),
             ';')
 
         relation_attribute_definition = Sequence(
@@ -444,12 +441,11 @@ def _load_comments(tokens: DbcTokens) -> DbcComments:
     for _comment_tokens in tokens.get('CM_', []):
         comment_tokens = dbc_assert_type(_comment_tokens, list)
         if not isinstance(comment_tokens[1], list):
-            # the CM_ token is a string, i.e., it is a bus comment. We
-            # implement CANdb++ behavior and concatenate all bus
-            # comments.
-            if comments.bus is None:
-                comments.bus = ''
-            comments.bus += dbc_assert_type(comment_tokens[1], str)
+            # Unqualified CM_ entries describe the entire database.
+            # Preserve CANdb++ behavior by concatenating them.
+            if comments.database is None:
+                comments.database = ''
+            comments.database += dbc_assert_type(comment_tokens[1], str)
             continue
 
         item: TokenList = comment_tokens[1]
@@ -842,7 +838,6 @@ def _load_signals(tokens: list[MatchObject],
         if message_signal_comments is None:
             return None
         return message_signal_comments.get(signal_name)
-
     def get_signal_choices(frame_id_dbc: int, signal_name: str) -> Choices | None:
         """Get choices for given signal.
 
@@ -851,17 +846,7 @@ def _load_signals(tokens: list[MatchObject],
         if message_choices is None:
             return None
 
-        c = message_choices.get(signal_name)
-        if c is None:
-            return None
-
-        # Remove the selected signal from the choices dict, this
-        # lets us validate that all VAL_ choices specified by the
-        # DBC are used by Messages.
-        del(message_choices[signal_name])
-
-        return c
-
+        return message_choices.get(signal_name)
 
     def get_signal_is_multiplexer(signal_tokens: TokenList) -> bool:
         mux_field = dbc_assert_type(signal_tokens[1], list)
@@ -945,12 +930,6 @@ def _load_signals(tokens: list[MatchObject],
         if frame_signal_types is None:
             return False
         signal_type = frame_signal_types.get(signal)
-        if signal_type is None:
-            return False
-        # Remove the selected signal type from the signal_types
-        # dict, this lets us validate that all SIG_VALTYPE_ entries
-        # specified by the DBC are used by Messages.
-        del(frame_signal_types[signal])
         return signal_type in FLOAT_SIGNAL_TYPES
 
     def get_signal_long_name(frame_id_dbc: int, signal_short_name: str) -> str:
@@ -1245,7 +1224,7 @@ def _load_version(tokens: DbcTokens) -> str | None:
     return typing.cast('str | None', dbc_assert_type(version_tokens[0], list)[1])
 
 
-def _load_bus(attributes: DbcAttributes, comments: DbcComments) -> Bus | None:
+def _load_bus(attributes: DbcAttributes) -> Bus | None:
     bus_name_attr = attributes.database.get('DBName')
     bus_name = ''
     if bus_name_attr is not None:
@@ -1256,12 +1235,10 @@ def _load_bus(attributes: DbcAttributes, comments: DbcComments) -> Bus | None:
     if bus_baudrate_attr is not None:
         bus_baudrate = int(float(bus_baudrate_attr.value))
 
-    bus_comment = comments.bus
-
-    if not any([bus_name, bus_baudrate, bus_comment]):
+    if not any([bus_name, bus_baudrate]):
         return None
 
-    return Bus(bus_name, baudrate=bus_baudrate, comment=bus_comment)
+    return Bus(bus_name, baudrate=bus_baudrate)
 
 
 def _load_nodes(tokens: DbcTokens, comments: DbcComments, attributes: DbcAttributes, attribute_definitions: OrderedDict[str, DbcAttributeDefinitionType]) -> list[Node] | None:
@@ -1396,7 +1373,7 @@ def load_string(string: str, strict: bool = True,
     attributes = _load_attributes(tokens, attribute_definitions_dict)
     relation_attribute_definitions = get_relation_definitions_dict(relation_definitions, relation_defaults)
     relation_attributes = _load_relation_attributes(tokens, relation_attribute_definitions)
-    bus = _load_bus(attributes, comments)
+    bus = _load_bus(attributes)
     value_tables = _load_value_tables(tokens)
     choices = _load_choices(tokens)
     message_senders = _load_message_senders(tokens, attributes)
@@ -1422,27 +1399,6 @@ def load_string(string: str, strict: bool = True,
     nodes = _load_nodes(tokens, comments, attributes, attribute_definitions_dict)
     version = _load_version(tokens)
     environment_variables = _load_environment_variables(tokens, comments, attributes, attribute_definitions_dict)
-
-    # There shouldn't be any choices/VAL_ entries left, each one should
-    # have been claimed by a Message above.
-    unused_choices = [ ]
-    for frame_id in choices:
-        for c in choices[frame_id]:
-            unused_choices.append(f"VAL_ {frame_id} {c}")
-    if len(unused_choices) > 0:
-        errors = "\n    ".join(unused_choices)
-        raise ValueError(f'unused VAL_ entries in DBC:\n    {errors}')
-
-    # There shouldn't be any SIG_VALTYPE_ signal_type entries left,
-    # each one should have been claimed by a Message above.
-    unused_signal_types = [ ]
-    for frame_id in signal_types:
-        for signal_type in signal_types[frame_id]:
-            unused_signal_types.append(f"SIG_VALTYPE_ {frame_id} {signal_type}")
-    if len(unused_signal_types) > 0:
-        errors = "\n    ".join(unused_signal_types)
-        raise ValueError(f'unused SIG_VALTYPE_ entries in DBC:\n    {errors}')
-
     dbc_specifics = DbcSpecifics(attributes=attributes.database or None,
                                  attribute_definitions=attribute_definitions_dict,
                                  environment_variables=environment_variables,
@@ -1454,4 +1410,5 @@ def load_string(string: str, strict: bool = True,
                             nodes or [],
                             [bus] if bus else [],
                             version,
-                            dbc_specifics)
+                            dbc_specifics,
+                            comment=comments.database)

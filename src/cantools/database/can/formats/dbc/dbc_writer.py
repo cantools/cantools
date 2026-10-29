@@ -497,9 +497,9 @@ def _dump_senders(database: InternalDatabase) -> list[str]:
 def _dump_comments(database: InternalDatabase, sort_signals: type_sort_signals) -> list[str]:
     comment_lines: list[str] = []
 
-    for bus in database.buses:
-        if bus.comment is not None:
-            comment_lines.append(f'CM_ "{bus.comment}";')
+    if database.comment is not None:
+        escaped_comment = database.comment.replace('"', '\\"')
+        comment_lines.append(f'CM_ "{escaped_comment}";')
 
     for node in database.nodes:
         if node.comment is not None:
@@ -805,9 +805,19 @@ def _dump_attributes(database: InternalDatabase, sort_signals: type_sort_signals
             if signal.raw_initial is None and 'GenSigStartValue' in sig_attributes:
                 del sig_attributes['GenSigStartValue']
             elif signal.raw_initial is not None:
-                sig_attributes['GenSigStartValue'] = DbcAttribute[float](
-                    value=float(signal.raw_initial),
-                    definition=ATTRIBUTE_DEFINITION_GENSIGSTARTVALUE)
+                # the database may define GenSigStartValue as INT, so use its
+                # definition and convert the value to its type like the loader
+                gen_sig_start_value_def = dbc_assert_type(
+                    database.dbc.attribute_definitions.get('GenSigStartValue'),
+                    DbcAttributeDefinition)
+                start_value: int | float
+                if gen_sig_start_value_def.type_name in ('INT', 'HEX', 'ENUM'):
+                    start_value = int(signal.raw_initial)
+                else:
+                    start_value = float(signal.raw_initial)
+                sig_attributes['GenSigStartValue'] = DbcAttribute(
+                    value=start_value,
+                    definition=gen_sig_start_value_def)
 
             # synchronize the attribute for the J1939 suspect parameter
             # number with the SPN specified by the signal object
@@ -1054,8 +1064,7 @@ def dump_string(database: InternalDatabase,
                 sort_attribute_signals:type_sort_signals=SORT_SIGNALS_DEFAULT,
                 sort_attributes:type_sort_attributes=None,
                 sort_choices:type_sort_choices=None,
-                shorten_long_names:bool=True,
-                file_comment:str | None=None) -> str:
+                shorten_long_names:bool=True) -> str:
     """Format database in DBC file format.
        sort_signals defines how to sort signals in message definitions
        sort_attribute_signals defines how to sort signals in metadata -
@@ -1082,9 +1091,6 @@ def dump_string(database: InternalDatabase,
     bo = _dump_messages(database, sort_signals)
     bo_tx_bu = _dump_senders(database)
     cm = _dump_comments(database, sort_attribute_signals)
-    if file_comment:
-        escaped_comment = file_comment.replace('"', '\\"')
-        cm.insert(0, f'CM_ "{escaped_comment}";')
     signal_types = _dump_signal_types(database)
     ba_def = _dump_attribute_definitions(database)
     ba_def_rel = _dump_relation_attribute_definitions(database)

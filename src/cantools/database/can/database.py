@@ -1,5 +1,6 @@
 import logging
 from collections import OrderedDict
+from copy import copy
 from typing import (
     Any,
     TextIO,
@@ -41,6 +42,16 @@ class Database:
     If you don't want them to be sorted pass `sort_signals = None`.
     If you want the signals to be sorted in another way pass something like
     `sort_signals = lambda signals: list(sorted(signals, key=lambda sig: sig.name))`
+
+    Adding files combines their nodes, buses and format-specific metadata.
+    Nodes and buses with the same name retain their position and combine
+    comments by language; incoming comments, node attributes and non-``None``
+    bus properties take precedence. Incoming global attributes, value tables
+    and environment variables replace entries with the same key. DBC attribute
+    definitions, including defaults and relation definitions, must agree;
+    otherwise ``cantools.database.errors.Error`` is raised.
+    Messages are appended and duplicate message lookups use the
+    latest message. The version is replaced by the incoming version.
     """
 
     def __init__(self,
@@ -53,6 +64,7 @@ class Database:
                  frame_id_mask: int | None = None,
                  strict: bool = True,
                  sort_signals: type_sort_signals = sort_signals_by_start_bit,
+                 comment: str | None = None,
                  ) -> None:
         self._messages = messages or []
         self._nodes = nodes or []
@@ -60,6 +72,7 @@ class Database:
         self._name_to_message: dict[str, Message] = {}
         self._frame_id_to_message: dict[int, Message] = {}
         self._version = version
+        self._comment = comment
         self._dbc = dbc_specifics
         self._autosar = autosar_specifics
 
@@ -110,6 +123,22 @@ class Database:
     @version.setter
     def version(self, value: str | None) -> None:
         self._version = value
+
+    @property
+    def comment(self) -> str | None:
+        """The database comment, or ``None`` if unavailable.
+
+        DBC global ``CM_`` comments are stored here rather than on a bus.
+        Multiple global entries are concatenated when loading. Set this
+        property to stamp generated DBC files with build information.
+        KCD, SYM and ARXML database comments are not mapped yet.
+
+        """
+        return self._comment
+
+    @comment.setter
+    def comment(self, value: str | None) -> None:
+        self._comment = value
 
     @property
     def dbc(self) -> DbcSpecifics | None:
@@ -289,12 +318,7 @@ class Database:
 
         database = arxml.load_string(string, self._strict, sort_signals=self._sort_signals)
 
-        self._add_messages(database.messages)
-        self._nodes = database.nodes
-        self._buses = database.buses
-        self._version = database.version
-        self._dbc = database.dbc
-        self._autosar = database.autosar
+        self._add_database(database)
 
     def add_dbc(self, fp: TextIO) -> None:
         """Read and parse DBC data from given file-like object and add the
@@ -336,11 +360,7 @@ class Database:
 
         database = dbc.load_string(string, self._strict, sort_signals=self._sort_signals)
 
-        self._add_messages(database.messages)
-        self._nodes = database.nodes
-        self._buses = database.buses
-        self._version = database.version
-        self._dbc = database.dbc
+        self._add_database(database)
 
     def add_kcd(self, fp: TextIO) -> None:
         """Read and parse KCD data from given file-like object and add the
@@ -371,11 +391,7 @@ class Database:
 
         database = kcd.load_string(string, self._strict, sort_signals=self._sort_signals)
 
-        self._add_messages(database.messages)
-        self._nodes = database.nodes
-        self._buses = database.buses
-        self._version = database.version
-        self._dbc = database.dbc
+        self._add_database(database)
 
     def add_sym(self, fp: TextIO) -> None:
         """Read and parse SYM data from given file-like object and add the
@@ -406,11 +422,61 @@ class Database:
 
         database = sym.load_string(string, self._strict, sort_signals=self._sort_signals)
 
-        self._add_messages(database.messages)
-        self._nodes = database.nodes
-        self._buses = database.buses
+        self._add_database(database)
+
+    def _add_database(self, database: InternalDatabase) -> None:
+        # Prepare metadata first so incompatible definitions leave this database
+        # untouched, including its message list and lookup dictionaries.
+        dbc_specifics = self._dbc
+        if database.dbc is not None:
+            dbc_specifics = (database.dbc if dbc_specifics is None
+                             else dbc_specifics._merge(database.dbc))
+
+        nodes: dict[str, Node] = {}
+        for node in [*self._nodes, *database.nodes]:
+            if node.name in nodes:
+                previous_node = nodes[node.name]
+                node = Node(
+                    node.name,
+                    comment={**(previous_node.comments or {}), **(node.comments or {})} or None,
+                    dbc_specifics=previous_node.dbc._merge(node.dbc),
+                    autosar_specifics=node.autosar)
+            nodes[node.name] = node
+
+        buses: dict[str, Bus] = {}
+        for bus in [*self._buses, *database.buses]:
+            if bus.name in buses:
+                previous_bus = buses[bus.name]
+                bus = Bus(
+                    bus.name,
+                    comment={**(previous_bus.comments or {}), **(bus.comments or {})} or None,
+                    baudrate=(bus.baudrate if bus.baudrate is not None
+                              else previous_bus.baudrate),
+                    fd_baudrate=(bus.fd_baudrate if bus.fd_baudrate is not None
+                                 else previous_bus.fd_baudrate),
+                    autosar_specifics=(bus.autosar if bus.autosar is not None
+                                       else previous_bus.autosar))
+            buses[bus.name] = bus
+
+        # Stage messages and lookups too: a late failure must not expose a
+        # partial addition while retaining the old metadata.
+        candidate = copy(self)
+        candidate._messages = self._messages.copy()
+        candidate._name_to_message = self._name_to_message.copy()
+        candidate._frame_id_to_message = self._frame_id_to_message.copy()
+        candidate._add_messages(database.messages)
+
+        self._messages[:] = candidate._messages
+        self._name_to_message = candidate._name_to_message
+        self._frame_id_to_message = candidate._frame_id_to_message
+        self._nodes = list(nodes.values())
+        self._buses = list(buses.values())
         self._version = database.version
-        self._dbc = database.dbc
+        if database.comment is not None:
+            self._comment = database.comment
+        self._dbc = dbc_specifics
+        if database.autosar is not None:
+            self._autosar = database.autosar
 
     def _add_messages(self, messages: list[Message]) -> None:
         """Add given messages to the database.
@@ -452,20 +518,15 @@ class Database:
                       sort_attribute_signals:type_sort_signals=SORT_SIGNALS_DEFAULT,
                       sort_attributes:type_sort_attributes=None,
                       sort_choices:type_sort_choices=None,
-                      shorten_long_names:bool=True,
-                      file_comment:str | None=None) -> str:
+                      shorten_long_names:bool=True) -> str:
         """Return the database as a string formatted as a DBC file.
            sort_signals defines how to sort signals in message definitions
            sort_attribute_signals defines how to sort signals in metadata -
            comments, value table definitions and attributes
 
-        ``file_comment`` optionally adds a global ``CM_`` entry at the start
-        of the comment section, after the message and environment variable
-        definitions. This can contain build information for generated files.
-        ``None`` or an empty string leaves the output unchanged. The database
-        is not modified. When loaded again, global comments are concatenated
-        into :attr:`Bus.comment<cantools.database.can.Bus.comment>`; the file
-        comment is not stored separately from existing bus comments.
+        :attr:`comment` is emitted as the first global ``CM_`` entry in
+        the comment section. ``None`` omits it; an empty string emits an
+        empty comment. Exporting does not modify the database.
 
         """
         if not self._sort_signals and sort_signals == SORT_SIGNALS_DEFAULT:
@@ -475,13 +536,13 @@ class Database:
                                                 self._nodes,
                                                 self._buses,
                                                 self._version,
-                                                self._dbc),
+                                                self._dbc,
+                                                comment=self._comment),
                                sort_signals=sort_signals,
                                sort_attribute_signals=sort_attribute_signals,
                                sort_attributes=sort_attributes,
                                sort_choices=sort_choices,
-                               shorten_long_names=shorten_long_names,
-                               file_comment=file_comment)
+                               shorten_long_names=shorten_long_names)
 
     def as_kcd_string(self, *, sort_signals:type_sort_signals=SORT_SIGNALS_DEFAULT) -> str:
         """Return the database as a string formatted as a KCD file.

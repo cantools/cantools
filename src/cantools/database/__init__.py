@@ -2,9 +2,13 @@ __all__ = ["Bus", "Database", "DecodeError", "EncodeError", "Message",
            "Node", "Signal", "dump_file", "load", "load_file", "load_string"]
 
 import os
+import traceback
 import warnings
 from contextlib import nullcontext
 from typing import Any, TextIO
+from xml.etree import ElementTree
+
+import textparser
 
 try:
     import diskcache  # type: ignore
@@ -26,6 +30,34 @@ from .errors import (
     UnsupportedDatabaseFormatError,
 )
 
+_FORMAT_PROBE_ERRORS: tuple[type[Exception], ...] = (
+    Error,
+    textparser.ParseError,
+    ElementTree.ParseError,
+    ValueError,
+    KeyError,
+)
+
+_UNEXPECTED_PROBE_ERROR = (
+    "probing for {database_format} raised {error}, which does not say whether "
+    "the string is in that format. The string was reported as an unsupported "
+    "database instead. Please open an issue at "
+    "https://github.com/cantools/cantools/issues with the traceback below.\n{traceback}"
+)
+
+
+def _warn_unexpected_probe_error(database_format: str, exc: Exception) -> None:
+    """Warn that a probe failed for a reason unrelated to the format."""
+    warnings.warn(
+        _UNEXPECTED_PROBE_ERROR.format(
+            database_format=database_format,
+            error=type(exc).__name__,
+            traceback="".join(traceback.format_exception(exc)),
+        ),
+        UserWarning,
+        stacklevel=2,
+    )
+
 
 def _resolve_database_format_and_encoding(database_format: str | None,
                                           encoding: str | None,
@@ -43,6 +75,10 @@ def _resolve_database_format_and_encoding(database_format: str | None,
             encoding = 'utf-8'
 
     return database_format, encoding
+
+# Bump when cached database objects become incompatible with the data model.
+_CACHE_VERSION = 1
+
 
 def load_file(filename: StringPathLike,
               database_format: str | None = None,
@@ -154,6 +190,7 @@ def load_file(filename: StringPathLike,
             # pickle serializer will fail anyway
             if not callable(sort_signals) or sort_signals.__module__ == 'cantools.database.utils':
                 cache_key = (
+                    _CACHE_VERSION,
                     database_format,
                     encoding,
                     frame_id_mask,
@@ -185,9 +222,7 @@ def dump_file(database: can.Database,
               filename: StringPathLike,
               database_format: str | None = None,
               encoding: str | None = None,
-              sort_signals: utils.type_sort_signals = utils.SORT_SIGNALS_DEFAULT,
-              *,
-              file_comment: str | None = None) -> None:
+              sort_signals: utils.type_sort_signals = utils.SORT_SIGNALS_DEFAULT) -> None:
     """Dump given database `database` to given file `filename`.
 
     Depending on the output file format signals may be sorted by default.
@@ -205,10 +240,6 @@ def dump_file(database: can.Database,
     endings (``\\r\\n``). For other database formats the line ending
     depends on the operating system.
 
-    ``file_comment`` is only supported for DBC output. See
-    :meth:`~cantools.database.can.Database.as_dbc_string` for its placement
-    and how it is represented when the file is loaded again.
-
     >>> db = cantools.database.load_file('foo.dbc')
     >>> cantools.database.dump_file(db, 'bar.dbc')
 
@@ -223,12 +254,8 @@ def dump_file(database: can.Database,
 
     newline = None
 
-    if file_comment is not None and database_format != 'dbc':
-        raise Error('file_comment is only supported for DBC output.')
-
     if database_format == 'dbc':
-        output = database.as_dbc_string(sort_signals=sort_signals,
-                                        file_comment=file_comment)
+        output = database.as_dbc_string(sort_signals=sort_signals)
         newline = ''
     elif database_format == 'kcd':
         output = database.as_kcd_string(sort_signals=sort_signals)
@@ -349,25 +376,37 @@ def load_string(string: str,
     if database_format in ['arxml', None]:
         try:
             return load_can_database('arxml')
+        except _FORMAT_PROBE_ERRORS as e:
+            e_arxml = e
         except Exception as e:
+            _warn_unexpected_probe_error('arxml', e)
             e_arxml = e
 
     if database_format in ['dbc', None]:
         try:
             return load_can_database('dbc')
+        except _FORMAT_PROBE_ERRORS as e:
+            e_dbc = e
         except Exception as e:
+            _warn_unexpected_probe_error('dbc', e)
             e_dbc = e
 
     if database_format in ['kcd', None]:
         try:
             return load_can_database('kcd')
+        except _FORMAT_PROBE_ERRORS as e:
+            e_kcd = e
         except Exception as e:
+            _warn_unexpected_probe_error('kcd', e)
             e_kcd = e
 
     if database_format in ['sym', None]:
         try:
             return load_can_database('sym')
+        except _FORMAT_PROBE_ERRORS as e:
+            e_sym = e
         except Exception as e:
+            _warn_unexpected_probe_error('sym', e)
             e_sym = e
 
     if database_format in ['cdd', None]:
@@ -375,7 +414,10 @@ def load_string(string: str,
             db = diagnostics.Database()
             db.add_cdd_string(string)
             return db
+        except _FORMAT_PROBE_ERRORS as e:
+            e_cdd = e
         except Exception as e:
+            _warn_unexpected_probe_error('cdd', e)
             e_cdd = e
 
     if database_format is not None:

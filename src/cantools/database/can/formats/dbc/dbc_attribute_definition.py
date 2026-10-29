@@ -117,4 +117,16 @@ class DbcAttributeDefinition(Generic[DbcAttributeValueTypeVar]):
     def __repr__(self) -> str:
         return f"attribute_definition('{self._name}', {self._default_value})"
 
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, DbcAttributeDefinition):
+            return NotImplemented
+
+        return (self.name == other.name
+                and self.default_value == other.default_value
+                and self.kind == other.kind
+                and self.type_name == other.type_name
+                and self.minimum == other.minimum
+                and self.maximum == other.maximum
+                and self.choices == other.choices)
+
 DbcAttributeDefinitionType = DbcAttributeDefinition[str] | DbcAttributeDefinition[int] | DbcAttributeDefinition[float]

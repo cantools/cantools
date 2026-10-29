@@ -23,10 +23,12 @@ class InternalDatabase:
                  buses: list[Bus],
                  version : str | None,
                  dbc_specifics: DbcSpecifics | None = None,
-                 autosar_specifics: AutosarDatabaseSpecifics | None = None):
+                 autosar_specifics: AutosarDatabaseSpecifics | None = None,
+                 comment: str | None = None):
         self.messages = messages
         self.nodes = nodes
         self.buses = buses
         self.version = version
+        self.comment = comment
         self.dbc = dbc_specifics
         self.autosar = autosar_specifics

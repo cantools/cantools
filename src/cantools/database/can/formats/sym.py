@@ -9,10 +9,12 @@ from itertools import groupby
 from typing import TYPE_CHECKING
 
 from textparser import (
+    MISMATCH,
     Any,
     DelimitedList,
     Optional,
     Parser,
+    Pattern,
     Sequence,
     Token,
     TokenizeError,
@@ -46,6 +48,17 @@ MAX_SIGNAL_NAME_LENGTH = 32
 SEND_MESSAGE_SENDER = 'ECU'
 # If a message is in the RECEIVE section of a SYM file, it is sent by the Peripheral devices
 RECEIVE_MESSAGE_SENDER = 'Peripherals'
+
+
+class _HexWord(Pattern):
+    """Recognize hex values where the grammar expects a number, not a name."""
+
+    def match(self, tokens):
+        token = tokens.peek()
+        if (token.kind == 'WORD'
+                and re.fullmatch(r'-?[A-F][0-9A-F]*h', token.value)):
+            return tokens.get_value()
+        return MISMATCH
 
 
 class SymParser60(Parser):
@@ -140,7 +153,7 @@ class SymParser60(Parser):
             ('SEND',               r'\{SEND\}'),
             ('RECEIVE',            r'\{RECEIVE\}'),
             ('SENDRECEIVE',        r'\{SENDRECEIVE\}'),
-            ('WORD',               r'[^\s=\(\]\-]+'),
+            ('WORD',               r'-[A-F][0-9A-F]*h\b|[^\s=\(\]\-]+'),
             ('MISMATCH',           r'.')
         ]
 
@@ -171,6 +184,7 @@ class SymParser60(Parser):
 
     def grammar(self):
         word = choice('WORD', *list(self.KEYWORDS))
+        hex_number = choice('HEXNUMBER', _HexWord())
         version = Sequence('FormatVersion', '=', 'NUMBER', 'COMMENT')
         title = Sequence('Title' , '=', 'STRING')
         unique_variables = Sequence('UniqueVariables' , '=', word)
@@ -226,18 +240,18 @@ class SymParser60(Parser):
 
         symbol = Sequence('[', Any(), ']',
                           ZeroOrMoreDict(choice(
-                              Sequence('ID', '=', 'HEXNUMBER',
-                                       Optional('HEXNUMBER'),
+                              Sequence('ID', '=', hex_number,
+                                       Optional(hex_number),
                                        Optional('COMMENT')),
                               Sequence('Len', '=', 'NUMBER'),
                               Sequence('Mux', '=', Any(), 'NUMBER', ',',
-                                       'NUMBER', choice('NUMBER', 'HEXNUMBER'),
+                                       'NUMBER', choice('NUMBER', hex_number),
                                        ZeroOrMore(choice('-t', '-m')),
                                        Optional('COMMENT')),
                               Sequence('CycleTime', '=', 'NUMBER', Optional('-p')),
                               Sequence('Timeout', '=', 'NUMBER'),
                               Sequence('MinInterval', '=', 'NUMBER'),
-                              Sequence('Color', '=', 'HEXNUMBER'),
+                              Sequence('Color', '=', hex_number),
                               variable,
                               Sequence('Sig', '=', Any(), 'NUMBER'),
                               Sequence('Type', '=', Any()))))
@@ -931,6 +945,14 @@ def _dump_message(message: Message, signals: list[Signal], min_frame_id: int | N
     return message_str
 
 def _dump_messages(database: InternalDatabase) -> str:
+    # The loader reads one Mux= signal per message, so independent or
+    # nested multiplexers would load back as a different message.
+    for message in database.messages:
+        num_multiplexers = sum(signal.is_multiplexer for signal in message.signals)
+        if num_multiplexers > 1:
+            raise ValueError(f"Message '{message.name}' has {num_multiplexers} multiplexer "
+                             "signals, but only one can be written to SYM.")
+
     send_messages = []
     receive_messages = []
     send_receive_messages = []

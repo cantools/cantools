@@ -49,12 +49,12 @@ messages and signals.
    >>> from pprint import pprint
    >>> db = cantools.database.load_file('tests/files/dbc/motohawk.dbc')
    >>> db.messages
-   [message('ExampleMessage', 0x1f0, False, 8, 'Example message used as template in MotoHawk models.')]
+   [message('ExampleMessage', 0x1f0, False, 8, {None: 'Example message used as template in MotoHawk models.'})]
    >>> example_message = db.get_message_by_name('ExampleMessage')
    >>> pprint(example_message.signals)
-   [signal('Enable', 7, 1, 'big_endian', False, 1.0, 0, 0.0, 0.0, '-', False, None, {0: 'Disabled', 1: 'Enabled'}, None),
-    signal('AverageRadius', 6, 6, 'big_endian', False, 0.1, 0, 0.0, 5.0, 'm', False, None, None, ''),
-    signal('Temperature', 0, 12, 'big_endian', True, 0.01, 250, 229.53, 270.47, 'degK', False, None, None, None)]
+   [signal('Enable', 7, 1, 'big_endian', False, None, 1, 0, None, None, '-', False, None, {0: 'Disabled', 1: 'Enabled'}, None, None),
+    signal('AverageRadius', 6, 6, 'big_endian', False, None, 0.1, 0, 0, 5, 'm', False, None, None, None, None),
+    signal('Temperature', 0, 12, 'big_endian', True, None, 0.01, 250, 229.52, 270.47, 'degK', False, None, None, None, None)]
 
 The example continues `encoding`_ a message and sending it on a CAN
 bus using the `python-can`_ package.
@@ -62,7 +62,7 @@ bus using the `python-can`_ package.
 .. code-block:: python
 
    >>> import can
-   >>> can_bus = can.interface.Bus('vcan0', bustype='socketcan')
+   >>> can_bus = can.interface.Bus('vcan0', interface='socketcan')
    >>> data = example_message.encode({'Temperature': 250.1, 'AverageRadius': 3.2, 'Enable': 1})
    >>> message = can.Message(arbitration_id=example_message.frame_id, is_extended_id=example_message.is_extended_frame, data=data)
    >>> can_bus.send(message)
@@ -76,7 +76,7 @@ The last part of the example receives and `decodes`_ a CAN message.
 
    >>> message = can_bus.recv()
    >>> db.decode_message(message.arbitration_id, message.data)
-   {'AverageRadius': 3.2, 'Enable': 'Enabled', 'Temperature': 250.09}
+   {'Enable': 'Enabled', 'AverageRadius': 3.2, 'Temperature': 250.1}
 
 See `examples`_ for additional examples.
 
@@ -118,6 +118,15 @@ Alternatively, the decoded message can be printed on a single line:
      vcan0  1F0   [8]  80 4A 0F 00 00 00 00 00 :: ExampleMessage(Enable: 'Enabled' -, AverageRadius: 0.0 m, Temperature: 255.92 degK)
      vcan0  1F0   [8]  80 4A 0F 00 00 00 00 00 :: ExampleMessage(Enable: 'Enabled' -, AverageRadius: 0.0 m, Temperature: 255.92 degK)
      vcan0  1F0   [8]  80 4A 0F 00 00 00 00 00 :: ExampleMessage(Enable: 'Enabled' -, AverageRadius: 0.0 m, Temperature: 255.92 degK)
+
+When piping decoded output into another program, Python may buffer its standard
+output. Set ``PYTHONUNBUFFERED=1`` on the decoder command to disable this buffering.
+The receiving program may also need line buffering, as shown with ``grep`` here:
+
+.. code-block:: bash
+
+   $ candump vcan0 | PYTHONUNBUFFERED=1 cantools decode --single-line \
+       tests/files/dbc/motohawk.dbc | grep --line-buffered ExampleMessage
 
 The plot subcommand
 ^^^^^^^^^^^^^^^^^^^

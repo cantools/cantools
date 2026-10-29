@@ -1,0 +1,33 @@
+VERSION ""
+NS_ :
+BS_:
+BU_: Node
+
+BO_ 1 Message: 1 Node
+ SG_ Signal : 0|8@1+ (1,0) [0|255] "" Node
+
+EV_ EnvVar: 0 [0|100] "" 0 0 DUMMY_NODE_VECTOR0 Node;
+
+BA_DEF_ "DatabaseText" STRING ;
+BA_DEF_ BU_ "NodeText" STRING ;
+BA_DEF_ BO_ "MessageText" STRING ;
+BA_DEF_ SG_ "SignalText" STRING ;
+BA_DEF_ EV_ "EnvironmentText" STRING ;
+BA_DEF_ "IntegerValue" INT 0 100;
+BA_DEF_ "HexValue" HEX 0 100;
+BA_DEF_ "FloatValue" FLOAT 0 100;
+BA_DEF_ "EnumValue" ENUM "first","second";
+BA_DEF_REL_ BU_SG_REL_ "SignalRelationText" STRING ;
+BA_DEF_REL_ BU_BO_REL_ "MessageRelationText" STRING ;
+
+BA_ "DatabaseText" "say \"hello\"";
+BA_ "NodeText" BU_ Node "say \"hello\"";
+BA_ "MessageText" BO_ 1 "say \"hello\"";
+BA_ "SignalText" SG_ 1 Signal "say \"hello\"";
+BA_ "EnvironmentText" EV_ EnvVar "say \"hello\"";
+BA_ "IntegerValue" 7;
+BA_ "HexValue" 15;
+BA_ "FloatValue" 1.5;
+BA_ "EnumValue" 1;
+BA_REL_ "SignalRelationText" BU_SG_REL_ Node SG_ 1 Signal "say \"hello\"";
+BA_REL_ "MessageRelationText" BU_BO_REL_ Node 1 "say \"hello\"";

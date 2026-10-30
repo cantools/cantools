@@ -1239,12 +1239,23 @@ def _load_bus(attributes: DbcAttributes, comments: DbcComments) -> Bus | None:
     if bus_baudrate_attr is not None:
         bus_baudrate = int(float(bus_baudrate_attr.value))
 
+    # Prefer Vector's BaudrateCANFD; accept BaudrateFD as a compatibility alias.
+    bus_fd_baudrate_attr = attributes.database.get('BaudrateCANFD')
+    if bus_fd_baudrate_attr is None:
+        bus_fd_baudrate_attr = attributes.database.get('BaudrateFD')
+    bus_fd_baudrate = None
+    if bus_fd_baudrate_attr is not None:
+        bus_fd_baudrate = int(float(bus_fd_baudrate_attr.value))
+
     bus_comment = comments.bus
 
-    if not any([bus_name, bus_baudrate, bus_comment]):
+    if not any([bus_name, bus_baudrate, bus_fd_baudrate, bus_comment]):
         return None
 
-    return Bus(bus_name, baudrate=bus_baudrate, comment=bus_comment)
+    return Bus(bus_name,
+               baudrate=bus_baudrate,
+               fd_baudrate=bus_fd_baudrate,
+               comment=bus_comment)
 
 
 def _load_nodes(tokens: DbcTokens, comments: DbcComments, attributes: DbcAttributes, attribute_definitions: OrderedDict[str, DbcAttributeDefinitionType]) -> list[Node] | None:

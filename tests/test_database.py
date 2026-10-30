@@ -5972,16 +5972,35 @@ BA_DEF_ BO_ "VFrameFormat" ENUM "StandardCAN","ExtendedCAN","J1939PG";
         signal = message.signals[0]
         self.assertEqual(signal.name, 'SignalA')
 
-        # float limits: choices keyed by 0.0 and 1.0 (not integers 0 and 1)
-        self.assertIn(0.0, signal.choices)
-        self.assertIn(1.0, signal.choices)
-        self.assertEqual(signal.choices[0.0], 'OFF')
-        self.assertEqual(signal.choices[1.0], 'ON')
+        # float limits: "0.0" and "1.0" are accepted as the raw values 0 and 1
+        self.assertIn(0, signal.choices)
+        self.assertIn(1, signal.choices)
+        self.assertEqual(signal.choices[0], 'OFF')
+        self.assertEqual(signal.choices[1], 'ON')
 
         # missing-lower-limit entry: lower_limit was absent, so it was inferred
         # from upper_limit=2 and the entry is present rather than dropped.
         self.assertIn(2, signal.choices)
         self.assertEqual(signal.choices[2], 'INVALID')
+
+    def test_system_float_enumeration_limits_arxml(self):
+        # enumeration limits written as "0.0" must give integer choice
+        # values, or encoding by name and DBC/KCD output break
+        db = cantools.database.load_file(
+            'tests/files/arxml/system-float-limits-missing-compu-scale-4.2.arxml')
+        message = db.messages[0]
+        choices = message.signals[0].choices
+
+        for value in choices:
+            self.assertIs(type(value), int)
+
+        encoded = message.encode({'SignalA': 'ON'})
+        self.assertEqual(message.decode(encoded)['SignalA'], 'ON')
+
+        dbc = cantools.database.load_string(db.as_dbc_string(), 'dbc')
+        self.assertEqual(dbc.messages[0].signals[0].choices, choices)
+        kcd = cantools.database.load_string(db.as_kcd_string(), 'kcd')
+        self.assertEqual(kcd.messages[0].signals[0].choices, choices)
 
     def test_system_bad_root_tag(self):
         with self.assertRaises(UnsupportedDatabaseFormatError) as cm:

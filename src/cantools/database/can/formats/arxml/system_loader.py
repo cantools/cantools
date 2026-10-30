@@ -1849,12 +1849,22 @@ class SystemLoader:
             self._get_unique_arxml_child(compu_scale, 'UPPER-LIMIT')
 
         if lower_limit is not None:
-            lower_limit = parse_number_string(lower_limit.text, allow_float=True)
+            lower_limit = self._parse_scale_limit(lower_limit.text)
 
         if upper_limit is not None:
-            upper_limit = parse_number_string(upper_limit.text, allow_float=True)
+            upper_limit = self._parse_scale_limit(upper_limit.text)
 
         return lower_limit, upper_limit
+
+    @staticmethod
+    def _parse_scale_limit(text: str) -> int | float:
+        # keep "0.0" an integer: text table limits are raw enum values
+        limit = parse_number_string(text, allow_float=True)
+
+        if isinstance(limit, float) and limit.is_integer():
+            return int(limit)
+
+        return limit
 
     def _load_scale_linear_and_texttable(self, compu_method, is_float):
         minimum = None

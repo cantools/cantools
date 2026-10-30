@@ -412,13 +412,17 @@ def _dump_nodes(database: InternalDatabase) -> list[str]:
     return node_names
 
 
+def _escape_display_text(text: str) -> str:
+    return text.replace('"', '\\"')
+
+
 def _dump_value_tables(database: InternalDatabase) -> list[str]:
     val_table: list[str] = []
 
     if database.dbc is not None:
         for name, choices in database.dbc.value_tables.items():
             choices_list = [
-                f'{number} "{text}"'
+                f'{number} "{_escape_display_text(str(text))}"'
                 for number, text in sorted(choices.items(), reverse=True)
             ]
             val_table.append('VAL_TABLE_ {} {} ;'.format(name, ' '.join(choices_list)))
@@ -474,7 +478,7 @@ def _dump_messages(database: InternalDatabase, sort_signals: type_sort_signals) 
                 offset=signal.offset,
                 minimum=(0 if signal.minimum is None else signal.minimum),
                 maximum=(0 if signal.maximum is None else signal.maximum),
-                unit='' if signal.unit is None else signal.unit))
+                unit='' if signal.unit is None else _escape_display_text(signal.unit)))
 
         message_lines.append('\r\n'.join(msg))
 
@@ -935,7 +939,7 @@ def _dump_choices(database: InternalDatabase, sort_signals: type_sort_signals, s
                 'VAL_ {frame_id} {name} {choices} ;'.format(
                     frame_id=get_dbc_frame_id(message),
                     name=signal.name,
-                    choices=' '.join([f'{value} "{text}"' for value, text in choices.items()])))
+                    choices=' '.join([f'{value} "{_escape_display_text(str(text))}"' for value, text in choices.items()])))
 
     return choice_lines
 

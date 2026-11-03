@@ -1,7 +1,7 @@
 import re
 import time
 import warnings
-from collections.abc import Iterator
+from collections.abc import Collection, Iterator
 from typing import (
     TYPE_CHECKING,
     TypeVar,
@@ -651,24 +651,38 @@ C_KEYWORDS = frozenset([
 PACK_UNPACK_PARAMETERS = frozenset(['dst_p', 'src_p', 'size'])
 
 
+def _escape_name(name: str,
+                 reserved: Collection[str],
+                 taken_names: Collection[str]) -> str:
+    if name in reserved:
+        name += '_'
+
+        while name in taken_names:
+            name += '_'
+
+    return name
+
+
 class CodeGenSignal:
 
-    def __init__(self, signal: "Signal") -> None:
+    def __init__(self,
+                 signal: "Signal",
+                 taken_names: Collection[str] = frozenset()) -> None:
         self.signal: Signal = signal
         self.snake_name = camel_to_snake_case(signal.name)
 
         # Function and macro names have a prefix and keep the snake
-        # name; the struct member and the pack and unpack variable do
-        # not, so they get a trailing underscore where needed.
-        self.member_name = self.snake_name
-
-        if self.member_name in C_KEYWORDS:
-            self.member_name += '_'
-
-        self.variable_name = self.member_name
-
-        if self.variable_name in PACK_UNPACK_PARAMETERS:
-            self.variable_name += '_'
+        # name. Two names do not, and get trailing underscores where
+        # needed, skipping the snake names of the other signals in
+        # the message (`taken_names`): `member_name` names the struct
+        # member, and `variable_name` the local variable that the pack
+        # and unpack functions declare for a signed or float signal.
+        self.member_name = _escape_name(self.snake_name,
+                                        C_KEYWORDS,
+                                        taken_names)
+        self.variable_name = _escape_name(self.member_name,
+                                          PACK_UNPACK_PARAMETERS,
+                                          taken_names)
 
     @property
     def unit(self) -> str:
@@ -868,7 +882,10 @@ class CodeGenMessage:
     def __init__(self, message: "Message") -> None:
         self.message = message
         self.snake_name = camel_to_snake_case(message.name)
-        self.cg_signals = [CodeGenSignal(signal) for signal in message.signals]
+        taken_names = {camel_to_snake_case(signal.name)
+                       for signal in message.signals}
+        self.cg_signals = [CodeGenSignal(signal, taken_names)
+                           for signal in message.signals]
 
     def get_signal_by_name(self, name: str) -> "CodeGenSignal":
         for cg_signal in self.cg_signals:

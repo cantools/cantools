@@ -1392,6 +1392,15 @@ BATTERY_VT(
         self.assertIn('memcpy(&dst_p->float_, &float_, sizeof(dst_p->float_));',
                       source)
 
+        # An escaped name skips the names of the other signals.
+        self.assertIn('uint8_t static__;', header)
+        self.assertIn('uint8_t static_;', header)
+        self.assertIn('int8_t size_;', header)
+        self.assertIn('uint8_t size__;', source)
+        self.assertIn('size__ = (uint8_t)src_p->size;', source)
+        self.assertIn('size_ = (uint8_t)src_p->size_;', source)
+        self.assertIn('dst_p->size = (int8_t)size__;', source)
+
         # Function and macro names keep the plain signal name.
         self.assertIn('uint8_t kw_frame_default_encode(double value);', header)
         self.assertIn('int16_t kw_frame_return_encode(double value);', header)

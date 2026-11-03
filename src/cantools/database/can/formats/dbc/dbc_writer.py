@@ -133,6 +133,13 @@ ATTRIBUTE_DEFINITION_BAUDRATE = DbcAttributeDefinition(
     minimum=0,
     maximum=10*1024*1024)
 
+ATTRIBUTE_DEFINITION_BAUDRATE_CANFD = DbcAttributeDefinition(
+    name='BaudrateCANFD',
+    default_value=2_000_000,
+    type_name='INT',
+    minimum=0,
+    maximum=16*1024*1024)
+
 ATTRIBUTE_DEFINITION_CANFD_BRS = DbcAttributeDefinition(
     name='CANFD_BRS',
     default_value='1',
@@ -608,6 +615,16 @@ def _dump_attribute_definitions(database: InternalDatabase) -> list[str]:
     elif 'Baudrate' in definitions:
         del definitions['Baudrate']
 
+    # create 'BaudrateCANFD' attribute definition (Vector CANdb++ name)
+    if len(database.buses) == 1 and database.buses[0].fd_baudrate is not None:
+        if 'BaudrateCANFD' not in definitions:
+            definitions['BaudrateCANFD'] = ATTRIBUTE_DEFINITION_BAUDRATE_CANFD
+        # Prefer the Vector attribute name when writing.
+        if 'BaudrateFD' in definitions:
+            del definitions['BaudrateFD']
+    elif 'BaudrateCANFD' in definitions:
+        del definitions['BaudrateCANFD']
+
     # create 'VFrameFormat' and 'CANFD_BRS' attribute definitions if bus is CAN FD
     if _bus_is_canfd(database):
         if 'VFrameFormat' not in definitions:
@@ -715,10 +732,19 @@ def _dump_attributes(database: InternalDatabase, sort_signals: type_sort_signals
     if 'Baudrate' in database.dbc.attributes:
         del database.dbc.attributes['Baudrate']
 
+    # Same for the CAN FD data-phase rate. Prefer Vector's BaudrateCANFD
+    # and drop the BaudrateFD alias so dumps use a single attribute name.
+    if 'BaudrateCANFD' in database.dbc.attributes:
+        del database.dbc.attributes['BaudrateCANFD']
+    if 'BaudrateFD' in database.dbc.attributes:
+        del database.dbc.attributes['BaudrateFD']
+
     # add a new 'Baudrate' attribute
     baudrate = None
+    fd_baudrate = None
     if len(database.buses) == 1:
         baudrate = database.buses[0].baudrate
+        fd_baudrate = database.buses[0].fd_baudrate
     if baudrate is not None:
         baudrate_attribute_definition = database.dbc.attribute_definitions.get('Baudrate')
         if baudrate_attribute_definition is None:
@@ -727,6 +753,17 @@ def _dump_attributes(database: InternalDatabase, sort_signals: type_sort_signals
         database.dbc.attributes['Baudrate'] = DbcAttribute[int](
             value=int(baudrate),
             definition=typing.cast('DbcAttributeDefinition[int]', baudrate_attribute_definition))
+
+    if fd_baudrate is not None:
+        fd_baudrate_attribute_definition = database.dbc.attribute_definitions.get(
+            'BaudrateCANFD')
+        if fd_baudrate_attribute_definition is None:
+            raise ParseError('Database defines an FD baudrate but no definition '
+                             'for the corresponding attribute')
+        database.dbc.attributes['BaudrateCANFD'] = DbcAttribute[int](
+            value=int(fd_baudrate),
+            definition=typing.cast('DbcAttributeDefinition[int]',
+                                   fd_baudrate_attribute_definition))
 
     for attribute in database.dbc.attributes.values():
         attributes.append(('dbc', attribute, None, None, None, None))

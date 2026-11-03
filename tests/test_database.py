@@ -403,6 +403,59 @@ BA_DEF_ BO_ "VFrameFormat" ENUM "StandardCAN","ExtendedCAN","J1939PG";
         self.assertEqual(len(db.buses), 1)
         self.assertEqual(db.buses[0].baudrate, 500000)
 
+    def test_dbc_load_bus_fd_baudrate(self):
+        db = cantools.database.load_file('tests/files/dbc/bus_fd_baudrate.dbc')
+
+        self.assertEqual(len(db.buses), 1)
+        bus = db.buses[0]
+        self.assertEqual(bus.name, 'FdBus')
+        self.assertEqual(bus.baudrate, 500000)
+        self.assertEqual(bus.fd_baudrate, 2000000)
+
+    def test_dbc_load_bus_fd_baudrate_alias(self):
+        # Compatibility alias used by some tools instead of Vector's name.
+        db = cantools.database.load_file(
+            'tests/files/dbc/bus_fd_baudrate_alias.dbc')
+
+        self.assertEqual(len(db.buses), 1)
+        bus = db.buses[0]
+        self.assertEqual(bus.name, 'FdAliasBus')
+        self.assertEqual(bus.baudrate, 250000)
+        self.assertEqual(bus.fd_baudrate, 4000000)
+
+        dumped = db.as_dbc_string()
+        self.assertIn('BA_ "BaudrateCANFD" 4000000;', dumped)
+        self.assertNotIn('BA_ "BaudrateFD"', dumped)
+
+        reloaded = cantools.database.load_string(dumped, database_format='dbc')
+        self.assertEqual(reloaded.buses[0].baudrate, 250000)
+        self.assertEqual(reloaded.buses[0].fd_baudrate, 4000000)
+
+    def test_arxml_to_dbc_preserves_fd_baudrate(self):
+        db = cantools.database.load_file('tests/files/arxml/system-4.2.arxml')
+        self.assertEqual(db.buses[0].baudrate, 500000)
+        self.assertEqual(db.buses[0].fd_baudrate, 2000000)
+
+        dumped = db.as_dbc_string()
+        self.assertIn('BA_ "Baudrate" 500000;', dumped)
+        self.assertIn('BA_ "BaudrateCANFD" 2000000;', dumped)
+
+        reloaded = cantools.database.load_string(dumped, database_format='dbc')
+        self.assertEqual(reloaded.buses[0].baudrate, 500000)
+        self.assertEqual(reloaded.buses[0].fd_baudrate, 2000000)
+
+    def test_dbc_dump_file_preserves_fd_baudrate(self):
+        filename_dump = 'bus_fd_baudrate_dump.dbc'
+        db = cantools.database.load_file('tests/files/dbc/bus_fd_baudrate.dbc')
+        cantools.database.dump_file(db, filename_dump)
+
+        try:
+            reloaded = cantools.database.load_file(filename_dump)
+            self.assertEqual(reloaded.buses[0].baudrate, 500000)
+            self.assertEqual(reloaded.buses[0].fd_baudrate, 2000000)
+        finally:
+            os.remove(filename_dump)
+
     def test_foobar_encode_decode(self):
         db = cantools.database.Database()
         db.add_dbc_file('tests/files/dbc/foobar.dbc')

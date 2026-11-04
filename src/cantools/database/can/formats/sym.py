@@ -669,6 +669,27 @@ def _get_senders(section_name: str) -> list[str]:
     else:
         raise ValueError(f'Unexpected message section named {section_name}')
 
+
+def _load_message_length(message_tokens, message_section_tokens):
+    length = 8
+
+    if 'Len' in message_tokens[3]:
+        length = int(message_tokens[3]['Len'][0][2])
+
+    if not _is_multiplexed(message_tokens):
+        return length
+
+    # Each section of a multiplexed message may state its own length, and
+    # the message has to be long enough for the longest one.
+    for tokens in message_section_tokens:
+        if (tokens[1] == message_tokens[1]
+                and 'ID' not in tokens[3]
+                and 'Len' in tokens[3]):
+            length = max(length, int(tokens[3]['Len'][0][2]))
+
+    return length
+
+
 def _load_message(frame_id,
                   is_extended_frame,
                   message_tokens,
@@ -681,12 +702,9 @@ def _load_message(frame_id,
     #print(message_tokens)
     # Default values.
     name = message_tokens[1]
-    length = 8
+    length = _load_message_length(message_tokens, message_section_tokens)
     cycle_time = None
     comment = None
-
-    if 'Len' in message_tokens[3]:
-        length = int(message_tokens[3]['Len'][0][2])
 
     # Cycle time.
     try:

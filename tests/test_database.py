@@ -2697,6 +2697,40 @@ BA_DEF_ BO_ "VFrameFormat" ENUM "StandardCAN","ExtendedCAN","J1939PG";
                              }
                          ])
 
+    def test_multiplexed_sections_with_different_lengths_sym(self):
+        db = cantools.database.load_string(
+            'FormatVersion=6.0 // Do not edit this line!\n'
+            'Title="Multiplexed sections with different lengths"\n'
+            '\n'
+            '{SENDRECEIVE}\n'
+            '\n'
+            '[TestAlert]\n'
+            'ID=700h\n'
+            'Len=4\n'
+            'Mux=FSM 0,8 1\n'
+            'Var=alert1 unsigned 8,1\n'
+            '\n'
+            '[TestAlert]\n'
+            'Len=8\n'
+            'Mux=TestMuxFloat 0,8 2\n'
+            'Var=value float 8,32\n'
+            '\n'
+            '[TestAlert]\n'
+            'Mux=TestMuxFloat 0,8 3\n'
+            'Var=alert2 unsigned 8,1\n',
+            database_format='sym')
+
+        message = db.get_message_by_name('TestAlert')
+        self.assertEqual(message.length, 8)
+
+        data = message.encode({'FSM': 2, 'value': 1.5})
+        self.assertEqual(len(data), 8)
+        self.assertEqual(message.decode(data), {'FSM': 2, 'value': 1.5})
+
+        reloaded = cantools.database.load_string(db.as_sym_string(),
+                                                 database_format='sym')
+        self.assertEqual(reloaded.get_message_by_name('TestAlert').length, 8)
+
     def test_type_parameter_overrides_is_extended_sym(self):
         db = cantools.database.Database()
         db.add_sym_file('tests/files/sym/type-extended-cycle-dash-p.sym')

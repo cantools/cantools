@@ -1,7 +1,7 @@
 import re
 import time
 import warnings
-from collections.abc import Iterator
+from collections.abc import Collection, Iterator
 from typing import (
     TYPE_CHECKING,
     TypeVar,
@@ -636,11 +636,53 @@ INIT_SIGNAL_BODY_TEMPLATE_FMT = '''\
 '''
 
 
+# Keywords of C99 and the stdbool.h macros, which the generated header
+# includes. A struct member or variable cannot take one of these names.
+C_KEYWORDS = frozenset([
+    'auto', 'bool', 'break', 'case', 'char', 'const', 'continue', 'default',
+    'do', 'double', 'else', 'enum', 'extern', 'false', 'float', 'for', 'goto',
+    'if', 'inline', 'int', 'long', 'register', 'restrict', 'return', 'short',
+    'signed', 'sizeof', 'static', 'struct', 'switch', 'true', 'typedef',
+    'union', 'unsigned', 'void', 'volatile', 'while'
+])
+
+# Parameters of the pack and unpack functions, which share their scope
+# with the variables declared in those functions.
+PACK_UNPACK_PARAMETERS = frozenset(['dst_p', 'src_p', 'size'])
+
+
+def _escape_name(name: str,
+                 reserved: Collection[str],
+                 taken_names: Collection[str]) -> str:
+    if name in reserved:
+        name += '_'
+
+        while name in taken_names:
+            name += '_'
+
+    return name
+
+
 class CodeGenSignal:
 
-    def __init__(self, signal: "Signal") -> None:
+    def __init__(self,
+                 signal: "Signal",
+                 taken_names: Collection[str] = frozenset()) -> None:
         self.signal: Signal = signal
         self.snake_name = camel_to_snake_case(signal.name)
+
+        # Function and macro names have a prefix and keep the snake
+        # name. Two names do not, and get trailing underscores where
+        # needed, skipping the snake names of the other signals in
+        # the message (`taken_names`): `member_name` names the struct
+        # member, and `variable_name` the local variable that the pack
+        # and unpack functions declare for a signed or float signal.
+        self.member_name = _escape_name(self.snake_name,
+                                        C_KEYWORDS,
+                                        taken_names)
+        self.variable_name = _escape_name(self.member_name,
+                                          PACK_UNPACK_PARAMETERS,
+                                          taken_names)
 
     @property
     def unit(self) -> str:
@@ -840,7 +882,10 @@ class CodeGenMessage:
     def __init__(self, message: "Message") -> None:
         self.message = message
         self.snake_name = camel_to_snake_case(message.name)
-        self.cg_signals = [CodeGenSignal(signal) for signal in message.signals]
+        taken_names = {camel_to_snake_case(signal.name)
+                       for signal in message.signals}
+        self.cg_signals = [CodeGenSignal(signal, taken_names)
+                           for signal in message.signals]
 
     def get_signal_by_name(self, name: str) -> "CodeGenSignal":
         for cg_signal in self.cg_signals:
@@ -939,7 +984,7 @@ def _generate_signal(cg_signal: "CodeGenSignal", bit_fields: bool) -> str:
                                       scale=scale,
                                       offset=offset,
                                       type_name=cg_signal.type_name,
-                                      name=cg_signal.snake_name,
+                                      name=cg_signal.member_name,
                                       length=length)
 
     return member
@@ -957,11 +1002,11 @@ def _format_pack_code_mux(cg_message: "CodeGenMessage",
                              variable_lines,
                              helper_kinds)
     multiplexed_signals_per_id = sorted(multiplexed_signals.items())
-    signal_name = camel_to_snake_case(signal_name)
+    member_name = cg_message.get_signal_by_name(signal_name).member_name
 
     lines = [
         '',
-        f'switch (src_p->{signal_name}) {{'
+        f'switch (src_p->{member_name}) {{'
     ]
 
     for multiplexer_id, signals_of_multiplexer_id in multiplexed_signals_per_id:
@@ -994,12 +1039,12 @@ def _format_pack_code_signal(cg_message: "CodeGenMessage",
     cg_signal = cg_message.get_signal_by_name(signal_name)
 
     if cg_signal.signal.conversion.is_float or cg_signal.signal.is_signed:
-        variable = f'    uint{cg_signal.type_length}_t {cg_signal.snake_name};'
+        variable = f'    uint{cg_signal.type_length}_t {cg_signal.variable_name};'
 
         if cg_signal.signal.conversion.is_float:
-            conversion = f'    memcpy(&{cg_signal.snake_name}, &src_p->{cg_signal.snake_name}, sizeof({cg_signal.snake_name}));'
+            conversion = f'    memcpy(&{cg_signal.variable_name}, &src_p->{cg_signal.member_name}, sizeof({cg_signal.variable_name}));'
         else:
-            conversion = f'    {cg_signal.snake_name} = (uint{cg_signal.type_length}_t)src_p->{cg_signal.snake_name};'
+            conversion = f'    {cg_signal.variable_name} = (uint{cg_signal.type_length}_t)src_p->{cg_signal.member_name};'
 
         variable_lines.append(variable)
         body_lines.append(conversion)
@@ -1007,13 +1052,15 @@ def _format_pack_code_signal(cg_message: "CodeGenMessage",
     for index, shift, shift_direction, mask in cg_signal.segments(invert_shift=False):
         if cg_signal.signal.conversion.is_float or cg_signal.signal.is_signed:
             fmt = '    dst_p[{}] |= pack_{}_shift_u{}({}, {}u, 0x{:02x}u);'
+            name = cg_signal.variable_name
         else:
             fmt = '    dst_p[{}] |= pack_{}_shift_u{}(src_p->{}, {}u, 0x{:02x}u);'
+            name = cg_signal.member_name
 
         line = fmt.format(index,
                           shift_direction,
                           cg_signal.type_length,
-                          cg_signal.snake_name,
+                          name,
                           shift,
                           mask)
         body_lines.append(line)
@@ -1082,10 +1129,10 @@ def _format_unpack_code_mux(cg_message: "CodeGenMessage",
                                variable_lines,
                                helper_kinds)
     multiplexed_signals_per_id = sorted(multiplexed_signals.items())
-    signal_name = camel_to_snake_case(signal_name)
+    member_name = cg_message.get_signal_by_name(signal_name).member_name
 
     lines = [
-        f'switch (dst_p->{signal_name}) {{'
+        f'switch (dst_p->{member_name}) {{'
     ]
 
     for multiplexer_id, signals_of_multiplexer_id in multiplexed_signals_per_id:
@@ -1117,7 +1164,7 @@ def _format_unpack_code_signal(cg_message: "CodeGenMessage",
     conversion_type_name = f'uint{cg_signal.type_length}_t'
 
     if cg_signal.signal.conversion.is_float or cg_signal.signal.is_signed:
-        variable = f'    {conversion_type_name} {cg_signal.snake_name};'
+        variable = f'    {conversion_type_name} {cg_signal.variable_name};'
         variable_lines.append(variable)
 
     segments = cg_signal.segments(invert_shift=True)
@@ -1125,10 +1172,12 @@ def _format_unpack_code_signal(cg_message: "CodeGenMessage",
     for i, (index, shift, shift_direction, mask) in enumerate(segments):
         if cg_signal.signal.conversion.is_float or cg_signal.signal.is_signed:
             fmt = '    {} {} unpack_{}_shift_u{}(src_p[{}], {}u, 0x{:02x}u);'
+            name = cg_signal.variable_name
         else:
             fmt = '    dst_p->{} {} unpack_{}_shift_u{}(src_p[{}], {}u, 0x{:02x}u);'
+            name = cg_signal.member_name
 
-        line = fmt.format(cg_signal.snake_name,
+        line = fmt.format(name,
                           '=' if i == 0 else '|=',
                           shift_direction,
                           cg_signal.type_length,
@@ -1139,20 +1188,20 @@ def _format_unpack_code_signal(cg_message: "CodeGenMessage",
         helper_kinds.add((shift_direction, cg_signal.type_length))
 
     if cg_signal.signal.conversion.is_float:
-        conversion = f'    memcpy(&dst_p->{cg_signal.snake_name}, &{cg_signal.snake_name}, sizeof(dst_p->{cg_signal.snake_name}));'
+        conversion = f'    memcpy(&dst_p->{cg_signal.member_name}, &{cg_signal.variable_name}, sizeof(dst_p->{cg_signal.member_name}));'
         body_lines.append(conversion)
     elif cg_signal.signal.is_signed:
         mask = ((1 << (cg_signal.type_length - cg_signal.signal.length)) - 1)
 
         if mask != 0:
             mask <<= cg_signal.signal.length
-            formatted = SIGN_EXTENSION_FMT.format(name=cg_signal.snake_name,
+            formatted = SIGN_EXTENSION_FMT.format(name=cg_signal.variable_name,
                                                   shift=cg_signal.signal.length - 1,
                                                   mask=mask,
                                                   suffix=cg_signal.conversion_type_suffix)
             body_lines.extend(formatted.splitlines())
 
-        conversion = f'    dst_p->{cg_signal.snake_name} = (int{cg_signal.type_length}_t){cg_signal.snake_name};'
+        conversion = f'    dst_p->{cg_signal.member_name} = (int{cg_signal.type_length}_t){cg_signal.variable_name};'
         body_lines.append(conversion)
 
 
@@ -1656,7 +1705,7 @@ def _generate_definitions(database_name: str,
 
             if cg_signal.signal.initial:
                 signals_init_body += INIT_SIGNAL_BODY_TEMPLATE_FMT.format(signal_initial=cg_signal.signal.raw_initial,
-                                                                          signal_name=cg_signal.snake_name)
+                                                                          signal_name=cg_signal.member_name)
 
         if cg_message.message.length > 0:
             pack_variables, pack_body = _format_pack_code(cg_message,

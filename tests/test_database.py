@@ -6940,6 +6940,19 @@ BA_DEF_ BO_ "VFrameFormat" ENUM "StandardCAN","ExtendedCAN","J1939PG";
                              message.is_fd,
                              message.name)
 
+    def test_fd_dbc_without_bus_type_dumps_no_new_definitions(self):
+        # A DBC file marks its CAN FD frames with "VFrameFormat" and need
+        # not define "BusType" or "CANFD_BRS". Dumping it must not add
+        # definitions that the source did not have.
+        with open('tests/files/dbc/fd_test.dbc') as fin:
+            source = ''.join(line for line in fin
+                             if 'BusType' not in line and 'CANFD_BRS' not in line)
+
+        db = cantools.database.load_string(source, 'dbc')
+        self.assertTrue(db.get_message_by_name('TestMsg_FDStd').is_fd)
+
+        self.assertNotIn('CANFD_BRS', db.as_dbc_string())
+
     def test_fd_detection(self):
         filename = "tests/files/dbc/fd_test.dbc"
         db = cantools.database.load_file(filename)

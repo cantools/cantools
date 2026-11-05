@@ -581,14 +581,7 @@ def _need_cycletime_def(database: InternalDatabase) -> bool:
                for m in database.messages)
 
 
-def _need_vframeformat_def(database: InternalDatabase) -> bool:
-    # A CAN FD frame is only marked as such by its "VFrameFormat"
-    # attribute. Databases loaded from other formats (e.g., ARXML) or
-    # created in code have no DBC "BusType" attribute, so their CAN FD
-    # frames need the definition as well.
-    if any(m.is_fd for m in database.messages):
-        return True
-
+def _bus_is_canfd(database: InternalDatabase) -> bool:
     if database.dbc is None:
         return False
 
@@ -596,6 +589,14 @@ def _need_vframeformat_def(database: InternalDatabase) -> bool:
     if bus_type is None:
         return False
     return bus_type.value == 'CAN FD'
+
+
+def _need_vframeformat_def(database: InternalDatabase) -> bool:
+    # A CAN FD frame is only marked as such by its "VFrameFormat"
+    # attribute. Databases loaded from other formats (e.g., ARXML) or
+    # created in code have no DBC "BusType" attribute, so their CAN FD
+    # frames need the definition as well.
+    return any(m.is_fd for m in database.messages)
 
 
 def _dump_attribute_definitions(database: InternalDatabase) -> list[str]:
@@ -637,8 +638,11 @@ def _dump_attribute_definitions(database: InternalDatabase) -> list[str]:
         del definitions['BaudrateCANFD']
 
     # create 'VFrameFormat' and 'CANFD_BRS' attribute definitions if
-    # bus is CAN FD or any message is a CAN FD frame
-    if _need_vframeformat_def(database):
+    # bus is CAN FD, or if CAN FD frames would otherwise be written
+    # without a frame format
+    if _bus_is_canfd(database) or (
+            'VFrameFormat' not in definitions
+            and _need_vframeformat_def(database)):
         if 'VFrameFormat' not in definitions:
             definitions['VFrameFormat'] = ATTRIBUTE_DEFINITION_VFRAMEFORMAT
         if 'CANFD_BRS' not in definitions:

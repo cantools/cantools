@@ -6925,6 +6925,34 @@ BA_DEF_ BO_ "VFrameFormat" ENUM "StandardCAN","ExtendedCAN","J1939PG";
         self.assertEqual(signal_group.signal_names[0], '___Brackets___')
         self.assertEqual(signal_group.signal_names[1], '_13StartsWithNumber')
 
+    def test_fd_frames_from_arxml_dump_to_dbc(self):
+        # The ARXML database has no DBC "BusType" attribute, but its
+        # CAN FD frames must stay CAN FD in the written DBC file.
+        db = cantools.database.load_file('tests/files/arxml/system-4.2.arxml')
+        fd_messages = [message.name for message in db.messages if message.is_fd]
+        self.assertEqual(fd_messages,
+                         ['MultiplexedMessage', 'Message1', 'Message2'])
+
+        dumped = cantools.database.load_string(db.as_dbc_string(), 'dbc')
+
+        for message in db.messages:
+            self.assertEqual(dumped.get_message_by_name(message.name).is_fd,
+                             message.is_fd,
+                             message.name)
+
+    def test_fd_dbc_without_bus_type_dumps_no_new_definitions(self):
+        # A DBC file marks its CAN FD frames with "VFrameFormat" and need
+        # not define "BusType" or "CANFD_BRS". Dumping it must not add
+        # definitions that the source did not have.
+        with open('tests/files/dbc/fd_test.dbc') as fin:
+            source = ''.join(line for line in fin
+                             if 'BusType' not in line and 'CANFD_BRS' not in line)
+
+        db = cantools.database.load_string(source, 'dbc')
+        self.assertTrue(db.get_message_by_name('TestMsg_FDStd').is_fd)
+
+        self.assertNotIn('CANFD_BRS', db.as_dbc_string())
+
     def test_fd_detection(self):
         filename = "tests/files/dbc/fd_test.dbc"
         db = cantools.database.load_file(filename)

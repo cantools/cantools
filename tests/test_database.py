@@ -6953,6 +6953,19 @@ BA_DEF_ BO_ "VFrameFormat" ENUM "StandardCAN","ExtendedCAN","J1939PG";
 
         self.assertNotIn('CANFD_BRS', db.as_dbc_string())
 
+    def test_fd_dbc_dump_after_clearing_fd(self):
+        # A message loaded as CAN FD that is changed to classic CAN must
+        # not keep its old "VFrameFormat" value in the written DBC file.
+        db = cantools.database.load_file('tests/files/dbc/fd_test.dbc')
+        db.get_message_by_name('TestMsg_FDStd').is_fd = False
+
+        dumped = cantools.database.load_string(db.as_dbc_string(), 'dbc')
+
+        for message in db.messages:
+            self.assertEqual(dumped.get_message_by_name(message.name).is_fd,
+                             message.is_fd,
+                             message.name)
+
     def test_fd_detection(self):
         filename = "tests/files/dbc/fd_test.dbc"
         db = cantools.database.load_file(filename)

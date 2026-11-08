@@ -117,10 +117,12 @@ def format_message_by_frame_id(dbase : Database,
                                single_line : bool,
                                decode_containers : bool,
                                *,
+                               force_extended_id: bool,
                                allow_truncated: bool,
                                allow_excess: bool) -> str:
     try:
-        message = dbase.get_message_by_frame_id(frame_id)
+        message = dbase.get_message_by_frame_id(
+            frame_id, force_extended_id=force_extended_id)
     except KeyError:
         return f' Unknown frame id {frame_id} (0x{frame_id:x})'
 

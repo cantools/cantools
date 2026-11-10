@@ -6966,6 +6966,24 @@ BA_DEF_ BO_ "VFrameFormat" ENUM "StandardCAN","ExtendedCAN","J1939PG";
                              message.is_fd,
                              message.name)
 
+    def test_dbc_dump_keeps_loaded_reserved_frame_format(self):
+        # Only a loaded frame format is rewritten from the message; a value
+        # such as "reserved" carries information the message cannot hold.
+        db = cantools.database.load_string(
+            'VERSION ""\n'
+            'NS_ :\n'
+            'BS_:\n'
+            'BU_: N\n'
+            'BO_ 291 M1: 8 N\n'
+            ' SG_ S : 0|8@1+ (1,0) [0|0] "" N\n'
+            'BA_DEF_ BO_ "VFrameFormat" ENUM "StandardCAN","ExtendedCAN",'
+            '"reserved","J1939PG";\n'
+            'BA_DEF_DEF_ "VFrameFormat" "StandardCAN";\n'
+            'BA_ "VFrameFormat" BO_ 291 2;\n',
+            'dbc')
+
+        self.assertIn('BA_ "VFrameFormat" BO_ 291 2;', db.as_dbc_string())
+
     def test_fd_detection(self):
         filename = "tests/files/dbc/fd_test.dbc"
         db = cantools.database.load_file(filename)

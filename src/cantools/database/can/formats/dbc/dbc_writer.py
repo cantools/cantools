@@ -591,6 +591,10 @@ def _bus_is_canfd(database: InternalDatabase) -> bool:
     return bus_type.value == 'CAN FD'
 
 
+V_FRAME_FORMATS = ('StandardCAN', 'ExtendedCAN', 'J1939PG',
+                   'StandardCAN_FD', 'ExtendedCAN_FD')
+
+
 def _need_vframeformat_def(database: InternalDatabase) -> bool:
     # A CAN FD frame is only marked as such by its "VFrameFormat"
     # attribute. Databases loaded from other formats (e.g., ARXML) or
@@ -829,10 +833,17 @@ def _dump_attributes(database: InternalDatabase, sort_signals: type_sort_signals
             else:
                 v_frame_format_str = 'StandardCAN'
             v_frame_format_def = _get_enum_vframeformat_definition(v_frame_format_def)
+            # a loaded frame format is overwritten even with the default, or it goes
+            # stale; other loaded values (e.g. 'reserved') are kept
+            loaded_v_frame_format_str = None
+            if 'VFrameFormat' in msg_attributes:
+                loaded_v_frame_format_str = v_frame_format_def.choices[
+                    int(msg_attributes['VFrameFormat'].value)]
             # only set the VFrameFormat if it is valid according to the attribute definition
             if (
                 v_frame_format_str in v_frame_format_def.choices
-                and v_frame_format_str != v_frame_format_def.default_value
+                and (v_frame_format_str != v_frame_format_def.default_value
+                     or loaded_v_frame_format_str in V_FRAME_FORMATS)
             ):
                 msg_attributes['VFrameFormat'] = DbcAttribute(
                     value=str(v_frame_format_def.choices.index(v_frame_format_str)),

@@ -29,6 +29,7 @@ def _do_decode(args):
                                                decode_choices,
                                                args.single_line,
                                                decode_containers,
+                                               force_extended_id=frame.is_extended_frame,
                                                allow_truncated=allow_truncated,
                                                allow_excess=allow_excess)
 

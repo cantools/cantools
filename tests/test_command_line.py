@@ -116,6 +116,27 @@ IO_DEBUG(
             actual_output = stdout.getvalue()
             self.assertEqual(actual_output, expected_output)
 
+    def test_decode_distinguishes_standard_and_extended_frame_ids(self):
+        dbase = cantools.database.Database(messages=[
+            cantools.database.Message(0x123, 'Standard', 1, [
+                cantools.database.Signal('standard_value', 0, 8),
+            ]),
+            cantools.database.Message(0x123, 'Extended', 1, [
+                cantools.database.Signal('extended_value', 0, 8),
+            ], is_extended_frame=True),
+        ])
+        argv = ['cantools', 'decode', '--single-line', 'fixture.dbc']
+        input_data = 'vcan0  123  [1]  01\nvcan0  00000123  [1]  02\n'
+        stdout = StringIO()
+        with patch('cantools.database.load_file', return_value=dbase), \
+             patch('sys.stdin', StringIO(input_data)), \
+             patch('sys.stdout', stdout), patch('sys.argv', argv):
+            cantools._main()
+
+        self.assertEqual(stdout.getvalue(),
+                         'vcan0  123  [1]  01 :: Standard(standard_value: 1)\n'
+                         'vcan0  00000123  [1]  02 :: Extended(extended_value: 2)\n')
+
     def test_decode_timestamp_absolute(self):
         argv = [
             'cantools',

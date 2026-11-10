@@ -168,7 +168,14 @@ class CandumpDefaultLogPattern(CandumpBasePattern):
         self.tz = tz
 
     def parse_timestamp(self, match_object: re.Match[str]) -> tuple[TimestampType, TimestampFormat]:
-        timestamp = datetime.datetime.fromtimestamp(float(match_object.group('timestamp')), self.tz)
+        timestamp_text = match_object.group('timestamp')
+        seconds = float(timestamp_text)
+        # candump pads epoch seconds to ten digits. With -tz it pads
+        # elapsed seconds to three digits, growing the field as needed.
+        if len(timestamp_text.partition('.')[0]) < 10:
+            return datetime.timedelta(seconds=seconds), TimestampFormat.RELATIVE
+
+        timestamp = datetime.datetime.fromtimestamp(seconds, self.tz)
         if self.convert_to_timezone_aware_object:
             timestamp = timestamp.astimezone()
         timestamp_format = TimestampFormat.ABSOLUTE
@@ -326,7 +333,7 @@ class Parser:
         '''
         :param tz: The timezone which returned datetime objects should have when parsing `candump -l`, `candump -L` or `candump -ta`.
                    (It cannot be applied to `candump -tA` because the information is missing which timezone the time stamps have.
-                    `candump -td`, `candump -tz` and PCAN trace do not have absolute time stamps but relative time stamps and return timedelta objects instead of datetime objects.)
+                    `candump -td`, `candump -tz` (including `-l` and `-L` output) and PCAN traces return relative time stamps as timedelta objects instead.)
                    With `tz=None` naive datetime objects representing the local system time will be returned.
                    With `tz=TZ_LOCAL` timezone-aware datetime objects in the local system time will be returned.
                    TZ_LOCAL should be preferred over None to avoid confusion with the naive datetime objects returned when parsing a `candump -tA` log.

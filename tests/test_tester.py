@@ -1,10 +1,14 @@
+import struct
 import time
 import unittest
 from queue import Empty, Queue
 
 import can
+from parameterized import parameterized
 
 import cantools
+from cantools.database.can import Message, Signal
+from cantools.database.conversion import BaseConversion
 
 
 class CanBus(can.BusABC):
@@ -376,6 +380,86 @@ class CanToolsTesterTest(unittest.TestCase):
         self.assertTrue(message_queue.empty())
 
         tester.stop()
+
+
+class InitialValuesTest(unittest.TestCase):
+
+    def make_message(self, signal, scaling, decode_choices=False):
+        database = Message(0x123, 'Initial', signal.length // 8, [signal])
+        bus = CanBus()
+        message = cantools.tester.Message(
+            database, bus, [], Queue(), decode_choices, scaling, False)
+        return message, bus
+
+    @parameterized.expand([
+        (name + str(scaling), raw, scale, offset, signed, physical,
+         expected, minimum, scaling)
+        for name, raw, scale, offset, signed, physical, expected, minimum in [
+            ('positive', 3, 2, 10, False, 16, b'\x03', None),
+            ('raw_zero', 0, 2, 10, False, 10, b'\x00', 10),
+            ('physical_zero', 3, 2, -6, False, 0, b'\x03', None),
+            ('signed', -2, 2, 10, True, 6, b'\xfe', None),
+            ('fractional', 3, 0.5, 0, False, 1.5, b'\x03', None),
+        ]
+        for scaling in (False, True)
+    ])
+    def test_declared_initial(self, name, raw, scale, offset, signed,
+                              physical, expected, minimum, scaling):
+        signal = Signal(
+            's', 0, 8, is_signed=signed, raw_initial=raw,
+            minimum=minimum,
+            conversion=BaseConversion.factory(scale=scale, offset=offset))
+        message, bus = self.make_message(signal, scaling)
+        self.assertEqual(message['s'], physical if scaling else raw, name)
+        message.send()
+        self.assertEqual(bytes(bus.wait_for_send().data), expected, name)
+
+    @parameterized.expand([
+        (scaling, decode_choices)
+        for scaling in (False, True)
+        for decode_choices in (False, True)
+    ])
+    def test_choice_initial(self, scaling, decode_choices):
+        signal = Signal(
+            's', 0, 8, raw_initial=0,
+            conversion=BaseConversion.factory(
+                scale=2, offset=10, choices={0: 'Off', 3: 'On'}))
+        message, bus = self.make_message(signal, scaling, decode_choices)
+        self.assertEqual(message['s'], signal.initial if scaling else 0)
+        message.send()
+        self.assertEqual(bytes(bus.wait_for_send().data), b'\x00')
+
+    def test_raw_initial_keeps_large_integer_precision(self):
+        raw = (1 << 60) + 7
+        signal = Signal(
+            's', 0, 64, raw_initial=raw,
+            conversion=BaseConversion.factory(scale=0.5))
+        message, bus = self.make_message(signal, scaling=False)
+        self.assertEqual(message['s'], raw)
+        message.send()
+        self.assertEqual(bytes(bus.wait_for_send().data), struct.pack('<Q', raw))
+
+    def test_raw_float_initial(self):
+        signal = Signal(
+            's', 0, 32, raw_initial=1.5,
+            conversion=BaseConversion.factory(scale=2, offset=4, is_float=True))
+        message, bus = self.make_message(signal, scaling=False)
+        self.assertEqual(message['s'], 1.5)
+        message.send()
+        self.assertEqual(bytes(bus.wait_for_send().data), struct.pack('<f', 1.5))
+
+    @parameterized.expand([
+        (scaling, minimum)
+        for scaling in (False, True)
+        for minimum in (None, 10)
+    ])
+    def test_missing_initial(self, scaling, minimum):
+        signal = Signal('s', 0, 8, minimum=minimum, maximum=255)
+        message, bus = self.make_message(signal, scaling)
+        expected = 0 if minimum is None else minimum
+        self.assertEqual(message['s'], expected)
+        message.send()
+        self.assertEqual(bytes(bus.wait_for_send().data), bytes([expected]))
 
 
 if __name__ == '__main__':

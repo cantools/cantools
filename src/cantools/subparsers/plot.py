@@ -65,7 +65,7 @@ except ImportError:
 
 from .. import database, errors
 from ..database.namedsignalvalue import NamedSignalValue
-from ..logreader import CAN_ERR_FLAG
+from ..logreader import CAN_ERR_FLAG, _parse_candump_date
 
 PYPLOT_BASE_COLORS = "bgrcmykwC"
 
@@ -128,7 +128,6 @@ class TimestampParser:
     # I am not using zero to compare against in case the beginning of the log file is stripped.
     THRESHOLD_ABSOLUTE_SECONDS = 60*60*24*7
 
-    FORMAT_ABSOLUTE_TIMESTAMP = "%Y-%m-%d %H:%M:%S.%f"
 
     def __init__(self, args):
         self.use_timestamp = None
@@ -294,7 +293,7 @@ class TimestampParser:
             return linenumber
 
     def parse_absolute_timestamp(self, timestamp):
-        return datetime.datetime.strptime(timestamp, self.FORMAT_ABSOLUTE_TIMESTAMP)  # noqa: DTZ007
+        return _parse_candump_date(timestamp)
 
     @staticmethod
     def parse_absolute_seconds(timestamp):

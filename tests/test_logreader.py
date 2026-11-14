@@ -383,6 +383,13 @@ class TestLogreaderFormats(unittest.TestCase):
         self.assertEqual(frame.timestamp, datetime.datetime(1970, 1, 1, 0, 0, 1,
                                                             tzinfo=datetime.timezone.utc))
 
+    def test_candump_log_absolute_timestamp_with_nanoseconds(self):
+        parser = cantools.logreader.Parser()
+        frame = parser.parse('(2020-12-19 12:04:45.485261999)  vcan0  0C8  [1]  F0')
+        self.assertEqual(frame.timestamp_format, cantools.logreader.TimestampFormat.ABSOLUTE)
+        self.assertEqual(frame.timestamp, datetime.datetime(2020, 12, 19, 12, 4, 45, 485261))  # noqa: DTZ001
+        self.assertEqual(frame.data, b'\xf0')
+
     def test_candump_log_absolute_timestamp(self):
         parser = cantools.logreader.Parser()
 

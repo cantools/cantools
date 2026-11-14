@@ -164,9 +164,15 @@ class CanToolsPlotTest(unittest.TestCase):
             mock.call.show(),
         ]
 
-        with mock.patch('sys.stdin', StringIO(input_data)), mock.patch('sys.argv', argv), PyplotMock() as plt:
-            cantools._main()
-            self.assertListEqual(plt.mock_calls, expected_calls)
+        for trace in (input_data, input_data.replace(')', '999)')):
+            with (
+                self.subTest(nanoseconds=(trace != input_data)),
+                mock.patch('sys.stdin', StringIO(trace)),
+                mock.patch('sys.argv', argv),
+                PyplotMock() as plt,
+            ):
+                cantools._main()
+                self.assertListEqual(plt.mock_calls, expected_calls)
 
 
     def test_plot_ta(self):

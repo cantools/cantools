@@ -15,6 +15,13 @@ TZ_LOCAL: Literal['local'] = 'local'
 # SocketCAN marks an error frame by this bit of the CAN id (linux/can.h)
 CAN_ERR_FLAG = 0x20000000
 
+
+def _parse_candump_date(timestamp: str) -> datetime.datetime:
+    # candump -N prints nanoseconds, but datetime stores microseconds.
+    timestamp = re.sub(r'(\.\d{6})\d{1,3}\Z', r'\1', timestamp)
+    return datetime.datetime.strptime(timestamp, '%Y-%m-%d %H:%M:%S.%f')  # noqa: DTZ007
+
+
 class TimestampFormat(enum.Enum):
     """Describes a type of timestamp. ABSOLUTE is referring to UNIX time
     (seconds since epoch). RELATIVE is seconds since start of log, or time
@@ -194,7 +201,7 @@ class CandumpAbsoluteLogPattern(CandumpBasePattern):
         r'^\s*?\((?P<timestamp>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d+)\)\s+(?P<channel>\S+)\s+(?P<can_id>[0-9A-F]+)\s+\[\d+\]\s*(?P<can_data>remote request|(?:[0-9A-F]{2} *)*)\s*(?P<error_frame>ERRORFRAME)?.*?$')
 
     def parse_timestamp(self, match_object: re.Match[str]) -> tuple[TimestampType, TimestampFormat]:
-        timestamp = datetime.datetime.strptime(match_object.group('timestamp'), "%Y-%m-%d %H:%M:%S.%f")  # noqa: DTZ007
+        timestamp = _parse_candump_date(match_object.group('timestamp'))
         timestamp_format = TimestampFormat.ABSOLUTE
         return timestamp, timestamp_format
 

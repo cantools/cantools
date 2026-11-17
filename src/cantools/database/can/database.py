@@ -156,7 +156,7 @@ class Database:
             if self._comments.get(lang) is not None:
                 return self._comments[lang]
 
-        return next(iter(comments.values()))
+        return next(iter(self._comments.values()), None)
 
     @comment.setter
     def comment(self, value: str | None) -> None:

@@ -508,8 +508,16 @@ def _dump_senders(database: InternalDatabase) -> list[str]:
 def _dump_comments(database: InternalDatabase, sort_signals: type_sort_signals) -> list[str]:
     comment_lines: list[str] = []
 
-    if database.comment is not None:
-        escaped_comment = database.comment.replace('"', '\\"')
+    global_comment = database.comment
+    if isinstance(global_comment, dict):
+        # DBC has no languages; prefer the language-less comment
+        global_comment = next(
+            (global_comment[lang] for lang in (None, 'FOR-ALL')
+             if lang in global_comment),
+            next(iter(global_comment.values()), None))
+
+    if global_comment is not None:
+        escaped_comment = global_comment.replace('"', '\\"')
         comment_lines.append(f'CM_ "{escaped_comment}";')
 
     for node in database.nodes:

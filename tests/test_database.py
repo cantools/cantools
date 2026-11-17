@@ -5161,6 +5161,13 @@ BO_ 287 Message01: 1 Vector__XXX
             str(cm.exception),
             'ARXML: "Could not parse AUTOSAR version \'4.2.2.1.0\'"')
 
+    def test_arxml_global_comment(self):
+        db = cantools.database.load_file('tests/files/arxml/system-4.2.arxml')
+        self.assertEqual(db.comment, 'Global system comment.')
+
+        db = cantools.database.load_file('tests/files/arxml/system-3.2.3.arxml')
+        self.assertIsNone(db.comment)
+
     def test_arxml_version(self):
         root = ElementTree.parse('tests/files/arxml/system-4.2.arxml').getroot()
         loader = cantools.database.can.formats.arxml.SystemLoader(root, strict=False)
@@ -5336,7 +5343,7 @@ BO_ 287 Message01: 1 Vector__XXX
         self.assertEqual(message_1.send_type, None)
         self.assertEqual(message_1.cycle_time, 500)
         self.assertEqual(len(message_1.signals), 6)
-        self.assertEqual(message_1.comments["EN"], 'The lonely frame description')
+        self.assertEqual(message_1.comments[None], 'The lonely frame description')
         self.assertEqual(message_1.bus_name, 'Network')
         self.assertTrue(message_1.dbc is None)
         self.assertTrue(message_1.autosar is not None)

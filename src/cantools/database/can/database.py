@@ -131,7 +131,8 @@ class Database:
         DBC global ``CM_`` comments are stored here rather than on a bus.
         Multiple global entries are concatenated when loading. Set this
         property to stamp generated DBC files with build information.
-        KCD, SYM and ARXML database comments are not mapped yet.
+        ARXML stores the description of the ``SYSTEM`` element here (English
+        if available). KCD and SYM database comments are not mapped yet.
 
         """
         return self._comment

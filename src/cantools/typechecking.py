@@ -18,8 +18,11 @@ if TYPE_CHECKING:
 
 
 class Formats(NamedTuple):
-    big_endian: CompiledFormatDict
-    little_endian: CompiledFormatDict
+    # One codec per layer of mutually non-overlapping signals. These
+    # lists have exactly one entry if the message does not contain
+    # overlapping signals.
+    big_endian_layers: list[CompiledFormatDict]
+    little_endian_layers: list[CompiledFormatDict]
     padding_mask: int
 
 

@@ -611,6 +611,22 @@ def _need_vframeformat_def(database: InternalDatabase) -> bool:
     return any(m.is_fd for m in database.messages)
 
 
+def _add_fd_vframeformat_choices(definition: DbcAttributeDefinitionType) -> None:
+    # A "VFrameFormat" enumeration without the CAN FD choices (e.g. the
+    # classic CANdb++ template) cannot mark a frame as CAN FD. Extend it
+    # with the remaining choices of ATTRIBUTE_DEFINITION_VFRAMEFORMAT, so
+    # the CAN FD choices get their standard indices and the existing
+    # indices keep their meaning. A choice the enumeration already has is
+    # not added twice.
+    if definition.type_name != 'ENUM':
+        return
+    choices = definition.choices
+    choices.extend([
+        'reserved' if choice in choices else choice
+        for choice in ATTRIBUTE_DEFINITION_VFRAMEFORMAT.choices[len(choices):]
+    ])
+
+
 def _dump_attribute_definitions(database: InternalDatabase) -> list[str]:
     attribute_definition_lines: list[str] = []
 
@@ -659,6 +675,8 @@ def _dump_attribute_definitions(database: InternalDatabase) -> list[str]:
             definitions['VFrameFormat'] = ATTRIBUTE_DEFINITION_VFRAMEFORMAT
         if 'CANFD_BRS' not in definitions:
             definitions['CANFD_BRS'] = ATTRIBUTE_DEFINITION_CANFD_BRS
+    if 'VFrameFormat' in definitions and _need_vframeformat_def(database):
+        _add_fd_vframeformat_choices(definitions['VFrameFormat'])
 
     def get_kind(definition: DbcAttributeDefinitionType) -> str:
         return '' if definition.kind is None else definition.kind + ' '

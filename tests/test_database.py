@@ -7267,6 +7267,43 @@ BO_ 287 Message01: 1 Vector__XXX
 
         self.assertIn('BA_ "VFrameFormat" BO_ 291 2;', db.as_dbc_string())
 
+    def test_fd_dbc_dump_with_classic_frame_format_choices(self):
+        # A DBC whose "VFrameFormat" enumeration has no CAN FD choices
+        # (e.g. the classic CANdb++ template) must still keep CAN FD frames.
+        for loaded_choices, bus_type in (
+                (['StandardCAN', 'ExtendedCAN', 'reserved', 'J1939PG'], 'CAN'),
+                (['StandardCAN', 'ExtendedCAN', 'reserved', 'J1939PG'], 'CAN FD'),
+                (['StandardCAN', 'ExtendedCAN', 'J1939PG'], 'CAN')):
+            with self.subTest(loaded_choices=loaded_choices, bus_type=bus_type):
+                db = cantools.database.load_string(
+                    'VERSION ""\n'
+                    'NS_ :\n'
+                    'BS_:\n'
+                    'BU_: N\n'
+                    'BO_ 291 M1: 8 N\n'
+                    ' SG_ S : 0|8@1+ (1,0) [0|0] "" N\n'
+                    'BO_ 2147484196 M2: 8 N\n'
+                    ' SG_ S : 0|8@1+ (1,0) [0|0] "" N\n'
+                    'BA_DEF_ "BusType" STRING ;\n'
+                    'BA_DEF_ BO_ "VFrameFormat" ENUM '
+                    + ','.join(f'"{choice}"' for choice in loaded_choices) + ';\n'
+                    'BA_DEF_DEF_ "BusType" "";\n'
+                    'BA_DEF_DEF_ "VFrameFormat" "StandardCAN";\n'
+                    f'BA_ "BusType" "{bus_type}";\n'
+                    'BA_ "VFrameFormat" BO_ 2147484196 1;\n',
+                    'dbc')
+                for message in db.messages:
+                    message.is_fd = True
+
+                dumped = cantools.database.load_string(db.as_dbc_string(), 'dbc')
+
+                for message in dumped.messages:
+                    self.assertTrue(message.is_fd, message.name)
+                choices = dumped.dbc.attribute_definitions['VFrameFormat'].choices
+                self.assertEqual(choices[:len(loaded_choices)], loaded_choices)
+                self.assertEqual(choices[14:], ['StandardCAN_FD', 'ExtendedCAN_FD'])
+                self.assertEqual(choices.count('J1939PG'), 1)
+
     def test_fd_detection(self):
         filename = "tests/files/dbc/fd_test.dbc"
         db = cantools.database.load_file(filename)

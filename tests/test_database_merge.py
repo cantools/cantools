@@ -74,12 +74,21 @@ Var=AddedSignal unsigned 0,8
 
 
 class DatabaseMetadataMergeTest(unittest.TestCase):
-    @parameterized.expand([('dbc',), ('kcd',), ('sym',), ('arxml',)])
+    @parameterized.expand([('dbc',), ('kcd',), ('sym',)])
     def test_import_without_global_comment_preserves_existing(self, database_format):
         database = cantools.database.Database(comment='Original')
         getattr(database, 'add_' + database_format + '_string')(
             added_source(database_format))
         self.assertEqual(database.comment, 'Original')
+
+    def test_arxml_import_merges_global_comment_languages(self):
+        database = cantools.database.Database(comment='Original')
+        database.add_arxml_string(added_source('arxml'))
+        self.assertEqual(database.comment, 'Original')
+        self.assertEqual(database.comments,
+                         {None: 'Original',
+                          'FOR-ALL': 'Global system comment.',
+                          'DE': 'Globaler Systemkommentar.'})
 
     def test_failed_import_preserves_global_comment(self):
         database = cantools.database.load_string(dbc_source(), 'dbc')

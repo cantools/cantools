@@ -159,7 +159,7 @@ class SystemLoader:
         # located within any package and the parameters which it
         # specifies affect a bunch of messages at once. we thus have
         # to load it separately...
-        self._load_system(root_packages, messages)
+        comment = self._load_system(root_packages, messages)
 
         arxml_version = \
             f'{self.autosar_version_major}.' \
@@ -176,6 +176,7 @@ class SystemLoader:
                                 nodes=nodes,
                                 messages=messages,
                                 version=None,
+                                comment=comment,
                                 autosar_specifics=autosar_specifics)
 
     def _load_buses(self, package_list):
@@ -494,7 +495,9 @@ class SystemLoader:
                                                     self._xml_namespaces)
 
                 if sub_package_list is not None:
-                    self._load_system(sub_package_list, messages)
+                    comment = self._load_system(sub_package_list, messages)
+                    if comment is not None:
+                        return comment
 
                 continue
 
@@ -515,6 +518,11 @@ class SystemLoader:
             for message in messages:
                 if message.is_container:
                     message.header_byte_order = container_header_byte_order
+
+            # the DESC of the system is the global database comment
+            return self._load_comments(system)
+
+        return None
 
     def _load_nodes(self, package_list):
         """Recursively extract all nodes (ECU-instances in AUTOSAR-speak) of
@@ -1369,7 +1377,7 @@ class SystemLoader:
             if l_2.text is None:
                 continue
 
-            lang = l_2.attrib.get('L', 'EN')
+            lang = l_2.attrib.get('L')
 
             # remove leading and trailing white space from each line
             # of multi-line comments

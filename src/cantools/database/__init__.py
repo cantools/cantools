@@ -194,6 +194,8 @@ def load_file(filename: StringPathLike,
                     sort_signals,
                     filename,
                     os.path.getmtime(filename),
+                    # Older DBC results put global comments on Bus.comment.
+                    'database-comment',
                 )
 
             db = cache.get(cache_key)

@@ -22,6 +22,23 @@ Functions and classes
 
 .. autofunction:: cantools.database.load
 
+.. rubric:: DBC global comments
+
+Set ``db.comment`` (or pass ``comment`` to the database constructor) to
+include build information in generated DBC files::
+
+    db = cantools.database.Database(comment="Build 42; revision abc123")
+    cantools.database.dump_file(db, "generated.dbc")
+
+Unqualified ``CM_`` entries now load into ``Database.comment``, instead of
+``Bus.comment``. Multiple entries are concatenated, as before. A global
+comment alone no longer creates an unnamed bus. Existing callers that read
+or set DBC global comments through a bus should use ``db.comment`` instead.
+Node, message, signal and environment-variable comments remain separate.
+CAN bus comments from other formats remain on their bus objects; DBC has
+no separate syntax for them. Database comment mappings for KCD, SYM and
+ARXML are outside this DBC change.
+
 .. autoclass:: cantools.database.can.Database
     :members:
 

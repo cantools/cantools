@@ -81,10 +81,14 @@ class DatabaseMetadataMergeTest(unittest.TestCase):
             added_source(database_format))
         self.assertEqual(database.comment, 'Original')
 
-    def test_arxml_import_replaces_global_comment(self):
+    def test_arxml_import_merges_global_comment_languages(self):
         database = cantools.database.Database(comment='Original')
         database.add_arxml_string(added_source('arxml'))
-        self.assertEqual(database.comment, 'Global system comment.')
+        self.assertEqual(database.comment, 'Original')
+        self.assertEqual(database.comments,
+                         {None: 'Original',
+                          'FOR-ALL': 'Global system comment.',
+                          'DE': 'Globaler Systemkommentar.'})
 
     def test_failed_import_preserves_global_comment(self):
         database = cantools.database.load_string(dbc_source(), 'dbc')

@@ -520,10 +520,7 @@ class SystemLoader:
                     message.header_byte_order = container_header_byte_order
 
             # the DESC of the system is the global database comment
-            comments = self._load_comments(system)
-            if comments is None:
-                return None
-            return comments.get('FOR-ALL', next(iter(comments.values())))
+            return self._load_comments(system)
 
         return None
 

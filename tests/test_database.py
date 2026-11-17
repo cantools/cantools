@@ -5164,6 +5164,8 @@ BO_ 287 Message01: 1 Vector__XXX
     def test_arxml_global_comment(self):
         db = cantools.database.load_file('tests/files/arxml/system-4.2.arxml')
         self.assertEqual(db.comment, 'Global system comment.')
+        self.assertEqual(db.comments, {'FOR-ALL': 'Global system comment.',
+                                       'DE': 'Globaler Systemkommentar.'})
 
         db = cantools.database.load_file('tests/files/arxml/system-3.2.3.arxml')
         self.assertIsNone(db.comment)
@@ -6895,11 +6897,11 @@ BO_ 287 Message01: 1 Vector__XXX
     def test_database_comment_reparses_legacy_cache(self):
         filename = 'tests/files/dbc/bus_comment.dbc'
         legacy = cantools.database.load_file(filename)
-        del legacy._comment
+        del legacy._comments
         legacy.buses[:] = [cantools.database.Bus('Network_A',
                                                  comment='SpecialRelease')]
         # Exact pre-migration cache key: objects stored here have global
-        # comments on Bus and no Database._comment field.
+        # comments on Bus and no Database._comments field.
         legacy_key = ('dbc', 'cp1252', None, False, True,
                       cantools.database.utils.sort_signals_by_start_bit,
                       filename, os.path.getmtime(filename))

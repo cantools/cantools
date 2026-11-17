@@ -6,7 +6,12 @@ from typing import (
     TextIO,
 )
 
-from ...typechecking import DecodeResultType, EncodeInputType, StringPathLike
+from ...typechecking import (
+    Comments,
+    DecodeResultType,
+    EncodeInputType,
+    StringPathLike,
+)
 from ..errors import DecodeError
 from ..utils import (
     SORT_SIGNALS_DEFAULT,
@@ -64,7 +69,7 @@ class Database:
                  frame_id_mask: int | None = None,
                  strict: bool = True,
                  sort_signals: type_sort_signals = sort_signals_by_start_bit,
-                 comment: str | None = None,
+                 comment: str | Comments | None = None,
                  ) -> None:
         self._messages = messages or []
         self._nodes = nodes or []
@@ -72,7 +77,7 @@ class Database:
         self._name_to_message: dict[str, Message] = {}
         self._frame_id_to_message: dict[int, Message] = {}
         self._version = version
-        self._comment = comment
+        self._comments = self._to_comments(comment)
         self._dbc = dbc_specifics
         self._autosar = autosar_specifics
 
@@ -124,22 +129,50 @@ class Database:
     def version(self, value: str | None) -> None:
         self._version = value
 
+    @staticmethod
+    def _to_comments(value: str | Comments | None) -> Comments | None:
+        # A plain string is handled a language-less comment.
+        if isinstance(value, str):
+            return Comments({None: value})
+
+        return value
+
     @property
     def comment(self) -> str | None:
         """The database comment, or ``None`` if unavailable.
 
-        DBC global ``CM_`` comments are stored here rather than on a bus.
-        Multiple global entries are concatenated when loading. Set this
-        property to stamp generated DBC files with build information.
-        ARXML stores the description of the ``SYSTEM`` element here (English
-        if available). KCD and SYM database comments are not mapped yet.
+        For DBC, global ``CM_`` comments are are used here, while
+        ARXML uses the description of the ``SYSTEM`` element. If
+        multiple languages are available, the language-less,
+        ``FOR-ALL`` or an comment for a random language is returned,
+        in that order of preference. Setting a string replaces all
+        languages with a language-less comment. KCD and SYM database
+        comments are not mapped yet.
 
         """
-        return self._comment
+        if self._comments is None:
+            return None
+        for lang in (None, 'FOR-ALL'):
+            if self._comments.get(lang) is not None:
+                return self._comments[lang]
+
+        return next(iter(comments.values()))
 
     @comment.setter
     def comment(self, value: str | None) -> None:
-        self._comment = value
+        self._comments = self._to_comments(value)
+
+    @property
+    def comments(self) -> Comments | None:
+        """The dictionary with the database comments in multiple
+        languages. ``None`` if unavailable.
+
+        """
+        return self._comments
+
+    @comments.setter
+    def comments(self, value: Comments | None) -> None:
+        self._comments = value
 
     @property
     def dbc(self) -> DbcSpecifics | None:
@@ -473,8 +506,14 @@ class Database:
         self._nodes = list(nodes.values())
         self._buses = list(buses.values())
         self._version = database.version
-        if database.comment is not None:
-            self._comment = database.comment
+
+        # merge the global comments for the databases. Incomming
+        # comments overwrite old ones.
+        incoming_comments = self._to_comments(database.comment)
+        if incoming_comments is not None:
+            self._comments = Comments(
+                {**(self._comments or {}), **incoming_comments})
+
         self._dbc = dbc_specifics
         if database.autosar is not None:
             self._autosar = database.autosar
@@ -538,7 +577,7 @@ class Database:
                                                 self._buses,
                                                 self._version,
                                                 self._dbc,
-                                                comment=self._comment),
+                                                comment=self.comment),
                                sort_signals=sort_signals,
                                sort_attribute_signals=sort_attribute_signals,
                                sort_attributes=sort_attributes,

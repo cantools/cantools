@@ -5,6 +5,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
+    from ...typechecking import Comments
     from .bus import Bus
     from .formats.arxml.database_specifics import AutosarDatabaseSpecifics
     from .formats.dbc.dbc_specifics import DbcSpecifics
@@ -24,7 +25,7 @@ class InternalDatabase:
                  version : str | None,
                  dbc_specifics: DbcSpecifics | None = None,
                  autosar_specifics: AutosarDatabaseSpecifics | None = None,
-                 comment: str | None = None):
+                 comment: str | Comments | None = None):
         self.messages = messages
         self.nodes = nodes
         self.buses = buses

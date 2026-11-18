@@ -194,9 +194,8 @@ def load_file(filename: StringPathLike,
                     sort_signals,
                     filename,
                     os.path.getmtime(filename),
-                    # Older cached results lack multi-language global
-                    # comments (and DBC ones used Bus.comment).
-                    'database-comments',
+                    # Earlier KCD cache entries lack Document text.
+                    'kcd-document-comment' if database_format == 'kcd' else 'database-comments',
                 )
 
             db = cache.get(cache_key)

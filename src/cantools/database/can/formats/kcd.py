@@ -420,11 +420,6 @@ def _dump_message(message, bus, node_refs, sort_signals):
                          SubElement(message_element, 'Signal'))
 
 
-def _dump_version(version, parent):
-    if version is not None:
-        SubElement(parent, 'Document', version=version)
-
-
 def _dump_nodes(nodes, messages, node_refs, parent):
     # Senders and receivers need not be in the node list (a SYM file
     # has none), but KCD refers to nodes by id, so declare them too.
@@ -469,16 +464,16 @@ def dump_string(database: InternalDatabase, *, sort_signals:type_sort_signals=SO
     }
     network_definition = Element('NetworkDefinition', attrib)
 
-    if database.version is None:
-        database.version = ''
-
-    _dump_version(database.version, network_definition)
+    document = SubElement(network_definition, 'Document', version=database.version or '')
+    if isinstance(database.comment, str):
+        document.text = database.comment
     _dump_nodes(database.nodes, database.messages, node_refs, network_definition)
     _dump_messages(database.messages, node_refs, network_definition, sort_signals)
 
     _indent_xml(network_definition, '  ')
 
-    return ElementTree.tostring(network_definition, encoding='unicode')
+    # XML readers normalize literal carriage returns in text to line feeds.
+    return ElementTree.tostring(network_definition, encoding='unicode').replace('\r', '&#13;')
 
 
 def load_string(string:str, strict:bool=True, sort_signals:type_sort_signals=sort_signals_by_start_bit) -> InternalDatabase:
@@ -496,11 +491,11 @@ def load_string(string:str, strict:bool=True, sort_signals:type_sort_signals=sor
     buses = []
     messages = []
 
-    try:
-        document = root.find('ns:Document', NAMESPACES)
-        version = document.attrib.get('version', None)  # type: ignore  # avoid mypy error: Item "None" of "Optional[Element]" has no attribute "attrib"
-    except AttributeError:
-        version = None
+    document = root.find('ns:Document', NAMESPACES)
+    version = document.get('version') if document is not None else None
+    comment = document.text if document is not None else None
+    if comment is not None and not comment.strip(' \t\r\n'):
+        comment = None
 
     for bus in root.iterfind('ns:Bus', NAMESPACES):
         bus_name = bus.attrib['name']
@@ -520,4 +515,5 @@ def load_string(string:str, strict:bool=True, sort_signals:type_sort_signals=sor
                                 for node in nodes
                             ],
                             buses,
-                            version)
+                            version,
+                            comment=comment)

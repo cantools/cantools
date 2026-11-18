@@ -1887,6 +1887,27 @@ BA_DEF_ BO_ "VFrameFormat" ENUM "StandardCAN","ExtendedCAN","J1939PG";
         self.assertEqual(db.version, None)
         self.assertEqual(db.nodes, [])
 
+    def test_kcd_document_comment(self):
+        db = cantools.database.load_file('tests/files/kcd/tester.kcd')
+        self.assertEqual(db.comment, '\n    Simulator.\n  ')
+        self.assertEqual(db.version, '1.0')
+
+        db.comment = 'Vehicle A & B\r\nRevision <2>'
+        output = db.as_kcd_string()
+        document = ElementTree.fromstring(output).find('{*}Document')
+        self.assertEqual(document.text, db.comment)
+        self.assertEqual(document.get('version'), '1.0')
+        self.assertEqual(cantools.database.load_string(output, 'kcd').comment,
+                         db.comment)
+
+    def test_kcd_blank_document_preserves_existing_comment(self):
+        db = cantools.database.Database(comment='Original')
+        db.add_kcd_file('tests/files/kcd/signal_range.kcd')
+        self.assertEqual(db.comment, 'Original')
+        db.add_kcd_string('<NetworkDefinition xmlns="http://kayak.2codeornot2code.org/1.0">'
+                          '<Document>&#160;</Document></NetworkDefinition>')
+        self.assertEqual(db.comment, '\xa0')
+
     def test_auto_message_length_kcd(self):
         db = cantools.database.load_file(
             'tests/files/kcd/auto_message_length.kcd')
@@ -6915,6 +6936,22 @@ BO_ 287 Message01: 1 Vector__XXX
             self.assertIn('CM_ "SpecialRelease";', db.as_dbc_string())
             cached = cantools.database.load_file(filename, cache_dir=self.cache_dir)
             self.assertEqual(cached.comment, 'SpecialRelease')
+            self.assertEqual(load.call_count, 1)
+
+    def test_kcd_document_comment_reparses_legacy_cache(self):
+        filename = 'tests/files/kcd/tester.kcd'
+        legacy = cantools.database.load_file(filename)
+        legacy.comment = None
+        legacy_key = ('kcd', 'utf-8', None, False, True,
+                      cantools.database.utils.sort_signals_by_start_bit,
+                      filename, os.path.getmtime(filename), 'database-comments')
+        with cantools.database.diskcache.Cache(self.cache_dir) as cache:
+            cache[legacy_key] = legacy
+        with unittest.mock.patch.object(cantools.database, 'load',
+                                        wraps=cantools.database.load) as load:
+            for _ in range(2):
+                db = cantools.database.load_file(filename, cache_dir=self.cache_dir)
+                self.assertEqual(db.comment, '\n    Simulator.\n  ')
             self.assertEqual(load.call_count, 1)
 
     def test_cache_prune_choices(self):

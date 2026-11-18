@@ -1032,6 +1032,17 @@ class TestLogreaderStreams(unittest.TestCase):
             next(frame_iter)
 
 
+@pytest.mark.parametrize('row', [
+    '1) 6357.213 {bus} Rx 0401 2 12 34',
+    '1) 6357.213 {bus} Rx 0401 - 2 12 34',
+    '1 6357.213 DT {bus} 0401 Rx - 2 12 34',
+])
+def test_pcan_multidigit_bus(row: str) -> None:
+    log = '\n'.join(row.format(bus=bus) for bus in (10, 1, 16))
+    frames = list(cantools.logreader.Parser(io.StringIO(log)))
+    assert [frame.channel for frame in frames] == ['pcan10', 'pcan1', 'pcan16']
+
+
 def test_data_frame_repr() -> None:
         parser = cantools.logreader.Parser()
         outp = parser.parse("vcan0  0C8   [8]  F0 00 00 00 00 00 00 00")

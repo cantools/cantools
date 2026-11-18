@@ -1,12 +1,17 @@
 import unittest
 from unittest.mock import patch
 
+from parameterized import parameterized
+
+import cantools
 import cantools.subparsers.list as list_module
 
 try:
     from StringIO import StringIO
 except ImportError:
     from io import StringIO
+
+MISSING_MESSAGE = 'No message named "missing" has been found in input file.'
 
 class Args:
 
@@ -23,6 +28,44 @@ class Args:
         self.items = []
 
 class CanToolsListTest(unittest.TestCase):
+    @parameterized.expand([
+        ([], ['Foo:', MISSING_MESSAGE, 'FOOBAR:']),
+        (['--exclude-extended'], [MISSING_MESSAGE, 'FOOBAR:']),
+        (['--exclude-normal'], ['Foo:', MISSING_MESSAGE]),
+        (['--exclude-extended', '--exclude-normal'], [MISSING_MESSAGE]),
+        (['--all', '--exclude-extended', '--exclude-normal'], [MISSING_MESSAGE]),
+    ])
+    def test_named_message_frame_filters(self, options, expected):
+        argv = ['cantools', 'list', *options, 'tests/files/dbc/foobar.dbc',
+                'Foo', 'missing', 'FOOBAR']
+        with patch('sys.argv', argv), patch('sys.stdout', new_callable=StringIO) as stdout:
+            cantools._main()
+
+        # Message headings and lookup errors are the only unindented lines.
+        lines = [line for line in stdout.getvalue().splitlines() if line and not line[0].isspace()]
+        self.assertEqual(lines, expected)
+
+    @parameterized.expand([
+        ([], True, False, ['BusA', 'BusB']),
+        ([], True, True, ['BusA']),
+        (['Status'], False, True, []),
+        (['Status'], True, False, ['BusB', 'BusA', 'BusB']),
+    ])
+    def test_same_message_name_on_different_buses(self, names, print_all, exclude_extended, buses):
+        db = cantools.database.load_string(
+            '<NetworkDefinition xmlns="http://kayak.2codeornot2code.org/1.0">'
+            '<Bus name="BusA"><Message id="0x123" name="Status" length="1"/></Bus>'
+            '<Bus name="BusB"><Message id="0x456" name="Status" length="1" format="extended"/></Bus>'
+            '</NetworkDefinition>', 'kcd')
+        args = Args('unused.kcd')
+        args.items = names
+        args.print_all = print_all
+        args.exclude_extended = exclude_extended
+        with patch('sys.stdout', new_callable=StringIO) as stdout:
+            list_module._do_list_messages(db, args, '')
+        self.assertEqual([line.strip() for line in stdout.getvalue().splitlines()
+                          if line.startswith('  Bus: ')], [f'Bus: {bus}' for bus in buses])
+
     def test_dbc(self):
         # Prepare mocks.
         args = Args('tests/files/dbc/motohawk.dbc')

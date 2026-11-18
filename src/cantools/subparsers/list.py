@@ -253,55 +253,32 @@ def _do_list_nodes(can_db: Database,
 def _do_list_messages(can_db: Database,
                       args: Any,
                       values_format_specifier: str) -> None:
-    message_names = args.items
-    print_all = args.print_all
-    exclude_extended = args.exclude_extended
-    exclude_normal = args.exclude_normal
-    print_format_specifics = not args.skip_format_specifics
+    messages: list[tuple[str, Message | None]] = []
+    for name in args.items:
+        try:
+            messages.append((name, can_db.get_message_by_name(name)))
+        except KeyError:
+            messages.append((name, None))
 
-    if print_all:
-        # if no messages have been specified, we print the list of
-        # messages in the database
-        for message in can_db.messages:
-            if message.is_extended_frame and exclude_extended:
-                continue
-            if not message.is_extended_frame and exclude_normal:
-                continue
-            message_names.append(message.name)
+    if args.print_all or not args.items:
+        messages.extend((message.name, message) for message in can_db.messages)
+        messages.sort(key=lambda item: item[0])
 
-        message_names.sort()
+    for name, message in messages:
+        if message is None:
+            print(f'No message named "{name}" has been found in input file.')
+            continue
+        if message.is_extended_frame and args.exclude_extended:
+            continue
+        if not message.is_extended_frame and args.exclude_normal:
+            continue
 
-    if not message_names:
-        # if no messages have been specified, we print the list of
-        # messages in the database
-        message_names = []
-        for message in can_db.messages:
-            if message.is_extended_frame and exclude_extended:
-                continue
-            if not message.is_extended_frame and exclude_normal:
-                continue
-
-            message_names.append(message.name)
-
-        message_names.sort()
-        for message_name in message_names:
-            print(message_name)
-
-        return
-    else:
-        # if a list of messages has been specified, the details of these
-        # are printed.
-        for message_name in message_names:
-            try:
-                message = can_db.get_message_by_name(message_name)
-            except KeyError:
-                print(f'No message named "{message_name}" has been found in input file.')
-                continue
-
+        if args.print_all or args.items:
             _print_message(message,
-                           print_format_specifics=print_format_specifics,
+                           print_format_specifics=not args.skip_format_specifics,
                            values_format_specifier=values_format_specifier)
-
+        else:
+            print(name)
 
 
 def add_subparser(subparsers: argparse._SubParsersAction) -> None:

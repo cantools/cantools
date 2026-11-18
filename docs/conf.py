@@ -14,11 +14,24 @@
 import os
 import sys
 from importlib.metadata import version as get_version
+from pathlib import Path
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 sys.path.insert(0, os.path.abspath(".."))
+
+
+def use_local_readme_images(app, relative_path, parent_docname, content):
+    if relative_path == Path("../README.rst"):
+        content[0] = content[0].replace(
+            ".. image:: https://github.com/cantools/cantools/raw/master/docs/",
+            ".. image:: /",
+        )
+
+
+def setup(app):
+    app.connect("include-read", use_local_readme_images)
 
 
 # -- General configuration ------------------------------------------------

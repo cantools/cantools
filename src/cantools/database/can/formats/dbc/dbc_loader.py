@@ -5,7 +5,7 @@ import typing
 from collections import OrderedDict, defaultdict
 from copy import deepcopy
 from dataclasses import dataclass, field
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation
 from typing import TypeVar
 
 from textparser import (
@@ -178,14 +178,20 @@ ATTRIBUTE_DEFINITION_VFRAMEFORMAT = DbcAttributeDefinition(
              'reserved', 'reserved',
              'StandardCAN_FD', 'ExtendedCAN_FD'])
 
+def _decimal(value: str) -> Decimal:
+    try:
+        return Decimal(value)
+    except InvalidOperation as e:
+        raise ValueError(f'Invalid numeric value "{value}"') from e
+
 def to_int(value: DbcAttributeValue) -> int:
     if isinstance(value, str):
-        return int(Decimal(value))
+        return int(_decimal(value))
     return int(value)
 
 def to_float(value: DbcAttributeValue) -> float:
     if isinstance(value, str):
-        return float(Decimal(value))
+        return float(_decimal(value))
     return float(value)
 
 class DbcParser(Parser):

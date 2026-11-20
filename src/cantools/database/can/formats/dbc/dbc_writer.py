@@ -612,6 +612,13 @@ def _need_vframeformat_def(database: InternalDatabase) -> bool:
 
 
 def _add_fd_vframeformat_choices(definition: DbcAttributeDefinitionType) -> None:
+    # An integer "VFrameFormat" holds indices into the same choices as the
+    # enumeration below (e.g. "INT 0 3" for classic CAN only). Widen its
+    # range to the last of them, or the CAN FD indices written for the
+    # messages lie outside the file's own definition.
+    if definition.type_name == 'INT' and definition.maximum is not None:
+        definition.maximum = max(definition.maximum,
+                                 len(ATTRIBUTE_DEFINITION_VFRAMEFORMAT.choices) - 1)
     # A "VFrameFormat" enumeration without the CAN FD choices (e.g. the
     # classic CANdb++ template) cannot mark a frame as CAN FD. Extend it
     # with the remaining choices of ATTRIBUTE_DEFINITION_VFRAMEFORMAT, so

@@ -7341,6 +7341,41 @@ BO_ 287 Message01: 1 Vector__XXX
                 self.assertEqual(choices[14:], ['StandardCAN_FD', 'ExtendedCAN_FD'])
                 self.assertEqual(choices.count('J1939PG'), 1)
 
+    def test_fd_dbc_dump_with_integer_frame_format_range(self):
+        # An integer "VFrameFormat" definition whose range ends before the
+        # CAN FD indices must be widened, or the written values lie outside
+        # the file's own definition.
+        for loaded_range, written_range in (('0 3', '0 15'),
+                                            ('1 3', '1 15'),
+                                            ('0 15', '0 15'),
+                                            ('0 20', '0 20')):
+            with self.subTest(loaded_range=loaded_range):
+                db = cantools.database.load_string(
+                    'VERSION ""\n'
+                    'NS_ :\n'
+                    'BS_:\n'
+                    'BU_: N\n'
+                    'BO_ 291 M1: 8 N\n'
+                    ' SG_ S : 0|8@1+ (1,0) [0|0] "" N\n'
+                    'BO_ 2147484196 M2: 8 N\n'
+                    ' SG_ S : 0|8@1+ (1,0) [0|0] "" N\n'
+                    f'BA_DEF_ BO_ "VFrameFormat" INT {loaded_range};\n'
+                    'BA_DEF_DEF_ "VFrameFormat" 1;\n'
+                    'BA_ "VFrameFormat" BO_ 2147484196 1;\n',
+                    'dbc')
+                for message in db.messages:
+                    message.is_fd = True
+
+                dumped = db.as_dbc_string()
+
+                self.assertIn(
+                    f'BA_DEF_ BO_  "VFrameFormat" INT {written_range};',
+                    dumped)
+                self.assertIn('BA_ "VFrameFormat" BO_ 291 14;', dumped)
+                self.assertIn('BA_ "VFrameFormat" BO_ 2147484196 15;', dumped)
+                for message in cantools.database.load_string(dumped, 'dbc').messages:
+                    self.assertTrue(message.is_fd, message.name)
+
     def test_fd_detection(self):
         filename = "tests/files/dbc/fd_test.dbc"
         db = cantools.database.load_file(filename)

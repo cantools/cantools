@@ -1,5 +1,15 @@
 |github-actions| |coverage|
 
+.. |github-actions| image:: https://github.com/cantools/cantools/actions/workflows/pythonpackage.yml/badge.svg?branch=master
+   :target: https://github.com/cantools/cantools/actions/workflows/pythonpackage.yml
+   :alt: Github Actions workflow status
+
+.. |coverage| image:: https://coveralls.io/repos/github/cantools/cantools/badge.svg?branch=master
+   :target: https://coveralls.io/github/cantoolscantools?branch=master
+   :alt: Test coverage reports on Coveralls.io
+
+.. end-badges
+
 About
 =====
 
@@ -441,15 +451,6 @@ Contributing
       firefox htmlcov/index.html
 
 #. Create a pull request.
-
-.. |github-actions| image:: https://github.com/cantools/cantools/actions/workflows/pythonpackage.yml/badge.svg?branch=master
-   :target: https://github.com/cantools/cantools/actions/workflows/pythonpackage.yml
-   :alt: Github Actions workflow status
-
-.. |coverage| image:: https://coveralls.io/repos/github/cantools/cantools/badge.svg?branch=master
-   :target: https://coveralls.io/github/cantoolscantools?branch=master
-   :alt: Test coverage reports on Coveralls.io
-
 
 .. _small DBC-file: https://github.com/cantools/cantools/blob/master/tests/files/dbc/motohawk.dbc
 

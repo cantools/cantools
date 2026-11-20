@@ -9,7 +9,13 @@
 CAN BUS tools
 =============
 
+.. only:: html
+
+   .. include:: ../README.rst
+      :end-before: .. end-badges
+
 .. include:: ../README.rst
+   :start-after: .. end-badges
 
 Functions and classes
 =====================

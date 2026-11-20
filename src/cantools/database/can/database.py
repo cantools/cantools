@@ -141,13 +141,13 @@ class Database:
     def comment(self) -> str | None:
         """The database comment, or ``None`` if unavailable.
 
-        For DBC, global ``CM_`` comments are are used here, while
-        ARXML uses the description of the ``SYSTEM`` element. If
+        DBC uses global ``CM_`` comments, KCD uses the text of
+        ``Document``, and ARXML uses the description of ``SYSTEM``. If
         multiple languages are available, the language-less,
         ``FOR-ALL`` or an comment for a random language is returned,
         in that order of preference. Setting a string replaces all
-        languages with a language-less comment. KCD and SYM database
-        comments are not mapped yet.
+        languages with a language-less comment. SYM database comments
+        are not mapped yet.
 
         """
         if self._comments is None:
@@ -595,7 +595,8 @@ class Database:
                                                 self._nodes,
                                                 self._buses,
                                                 self._version,
-                                                self._dbc),
+                                                self._dbc,
+                                                comment=self.comment),
                                sort_signals=sort_signals)
 
     def as_sym_string(self, *, sort_signals:type_sort_signals=SORT_SIGNALS_DEFAULT) -> str:

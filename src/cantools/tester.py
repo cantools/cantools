@@ -229,7 +229,9 @@ class Message(UserDict):
                     return
 
     def _filter_expected_message(self, message, signals):
-        if message.name == self.database.name and all(message.signals[name] == signals[name] for name in signals):
+        if message.name == self.database.name and all(
+                name in message.signals and message.signals[name] == signals[name]
+                for name in signals):
             return message.signals
 
     def send_periodic_start(self):

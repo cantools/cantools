@@ -319,14 +319,14 @@ def add_subparser(subparsers: argparse._SubParsersAction) -> None:
         action='store_const',
         const=True,
         required=False,
-        help='Do not print non-extended CAN messages.')
+        help=('Do not print non-extended CAN messages unless explicitly named.'))
     list_parser.add_argument(
         '-x', '--exclude-extended',
         default=False,
         action='store_const',
         const=True,
         required=False,
-        help='Do not print extended CAN messages.')
+        help=('Do not print extended CAN messages unless explicitly named.'))
     list_parser.add_argument(
         '--skip-format-specifics',
         default=False,

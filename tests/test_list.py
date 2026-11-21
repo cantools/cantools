@@ -1,12 +1,17 @@
 import unittest
 from unittest.mock import patch
 
+from parameterized import parameterized
+
+import cantools
 import cantools.subparsers.list as list_module
 
 try:
     from StringIO import StringIO
 except ImportError:
     from io import StringIO
+
+MISSING_MESSAGE = 'No message named "missing" has been found in input file.'
 
 class Args:
 
@@ -23,6 +28,31 @@ class Args:
         self.items = []
 
 class CanToolsListTest(unittest.TestCase):
+    @parameterized.expand([
+        ([], ['Foo:', MISSING_MESSAGE, 'FOOBAR:']),
+        (['--exclude-extended'], ['Foo:', MISSING_MESSAGE, 'FOOBAR:']),
+        (['--exclude-normal'], ['Foo:', MISSING_MESSAGE, 'FOOBAR:']),
+        (['--exclude-extended', '--exclude-normal'],
+         ['Foo:', MISSING_MESSAGE, 'FOOBAR:']),
+        (['--all'],
+         ['Bar:', 'CanFd:', 'FOOBAR:', 'FOOBAR:', 'Foo:', 'Foo:', 'Fum:', MISSING_MESSAGE]),
+        (['--all', '--exclude-extended'],
+         ['FOOBAR:', 'FOOBAR:', 'Foo:', MISSING_MESSAGE]),
+        (['--all', '--exclude-normal'],
+         ['Bar:', 'CanFd:', 'FOOBAR:', 'Foo:', 'Foo:', 'Fum:', MISSING_MESSAGE]),
+        (['--all', '--exclude-extended', '--exclude-normal'],
+         ['FOOBAR:', 'Foo:', MISSING_MESSAGE]),
+    ])
+    def test_explicit_messages_bypass_frame_filters(self, options, expected):
+        argv = ['cantools', 'list', *options, 'tests/files/dbc/foobar.dbc',
+                'Foo', 'missing', 'FOOBAR']
+        with patch('sys.argv', argv), patch('sys.stdout', new_callable=StringIO) as stdout:
+            cantools._main()
+
+        # Message headings and lookup errors are the only unindented lines.
+        lines = [line for line in stdout.getvalue().splitlines() if line and not line[0].isspace()]
+        self.assertEqual(lines, expected)
+
     def test_dbc(self):
         # Prepare mocks.
         args = Args('tests/files/dbc/motohawk.dbc')

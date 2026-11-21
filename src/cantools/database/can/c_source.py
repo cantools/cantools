@@ -956,9 +956,14 @@ def _format_range(cg_signal: "CodeGenSignal") -> str:
         return round(raw_val)
 
     if minimum is not None and maximum is not None:
+        raw_minimum = phys_to_raw(minimum)
+        raw_maximum = phys_to_raw(maximum)
+        if raw_minimum > raw_maximum:
+            raw_minimum, raw_maximum = raw_maximum, raw_minimum
+
         return \
-            f'{phys_to_raw(minimum)}..' \
-            f'{phys_to_raw(maximum)} ' \
+            f'{raw_minimum}..' \
+            f'{raw_maximum} ' \
             f'({round(minimum, 5)}..{round(maximum, 5)} {cg_signal.unit})'
     elif minimum is not None:
         return f'{phys_to_raw(minimum)}.. ({round(minimum, 5)}.. {cg_signal.unit})'
@@ -1356,6 +1361,10 @@ def _generate_is_in_range(cg_signal: "CodeGenSignal") -> str:
     if (maximum is None and cg_signal.maximum_can_raw_value is not None) and \
        (cg_signal.maximum_ctype_value is None or cg_signal.maximum_can_raw_value < cg_signal.maximum_ctype_value):
         maximum = cg_signal.maximum_can_raw_value
+
+    if minimum is not None and maximum is not None and minimum > maximum:
+        # A negative factor reverses the order of the raw limits.
+        minimum, maximum = maximum, minimum
 
     suffix = cg_signal.type_suffix
     check = []

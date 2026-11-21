@@ -19,6 +19,16 @@ class DecodeError(Error):
     pass
 
 
+def format_load_error(database_format: str, e: Exception) -> str:
+    """Return the message for an error raised loading `database_format`."""
+
+    if isinstance(e, Error):
+        return f'{database_format.upper()}: "{e}"'
+
+    return (f'{database_format.upper()}: "{type(e).__name__}: {e}" '
+            f'(this is a bug in cantools that ought to be fixed)')
+
+
 class UnsupportedDatabaseFormatError(Error):
     """This exception is raised when
     :func:`~cantools.database.load_file()`,
@@ -36,20 +46,13 @@ class UnsupportedDatabaseFormatError(Error):
                  e_cdd: Exception | None) -> None:
         message_chunks: list[str] = []
 
-        if e_arxml is not None:
-            message_chunks.append(f'ARXML: "{e_arxml}"')
-
-        if e_dbc is not None:
-            message_chunks.append(f'DBC: "{e_dbc}"')
-
-        if e_kcd is not None:
-            message_chunks.append(f'KCD: "{e_kcd}"')
-
-        if e_sym is not None:
-            message_chunks.append(f'SYM: "{e_sym}"')
-
-        if e_cdd is not None:
-            message_chunks.append(f'CDD: "{e_cdd}"')
+        for database_format, e in [('arxml', e_arxml),
+                                   ('dbc', e_dbc),
+                                   ('kcd', e_kcd),
+                                   ('sym', e_sym),
+                                   ('cdd', e_cdd)]:
+            if e is not None:
+                message_chunks.append(format_load_error(database_format, e))
 
         message = ', '.join(message_chunks)
 

@@ -8,6 +8,7 @@ from xml.etree import ElementTree
 
 from cantools.database.can.internal_database import InternalDatabase
 
+from ....errors import ParseError
 from ....utils import sort_signals_by_start_bit, type_sort_signals
 from .bus_specifics import AutosarBusSpecifics
 from .database_specifics import AutosarDatabaseSpecifics
@@ -50,11 +51,14 @@ def load_string(string:str,
 
     """
 
-    root = ElementTree.fromstring(string)
+    try:
+        root = ElementTree.fromstring(string)
+    except ElementTree.ParseError as e:
+        raise ParseError(str(e)) from e
 
     m = re.match(r'{(.*)}AUTOSAR', root.tag)
     if not m:
-        raise ValueError(f"No XML namespace specified or illegal root tag name '{root.tag}'")
+        raise ParseError(f"No XML namespace specified or illegal root tag name '{root.tag}'")
     xml_namespace = m.group(1)
 
     # Should be replaced with a validation using the XSD file.
@@ -65,12 +69,12 @@ def load_string(string:str,
         recognized_namespace = True
 
     if not recognized_namespace:
-        raise ValueError(f"Unrecognized XML namespace '{xml_namespace}'")
+        raise ParseError(f"Unrecognized XML namespace '{xml_namespace}'")
 
     if is_ecu_extract(root):
         expected_root = f'{{{xml_namespace}}}AUTOSAR'
         if root.tag != expected_root:
-            raise ValueError(f'Expected root element tag {expected_root}, '
+            raise ParseError(f'Expected root element tag {expected_root}, '
                              f'but got {root.tag}.')
 
         return EcuExtractLoader(root, strict, sort_signals).load()

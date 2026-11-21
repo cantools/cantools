@@ -1744,6 +1744,36 @@ BATTERY_VT(
                 c_content
             )
 
+    def test_generate_c_source_is_in_range_negative_scaling(self):
+        """
+        Test that a negative factor does not swap the raw range limits.
+        """
+        with tempfile.TemporaryDirectory() as _tmpdir:
+            tmpdir = Path(_tmpdir)
+
+            argv = [
+                'cantools',
+                'generate_c_source',
+                'tests/files/dbc/issue_636_negative_scaling.dbc',
+                '-o',
+                str(tmpdir),
+            ]
+
+            with patch('sys.argv', argv):
+                cantools._main()
+
+            c_content = (tmpdir / 'issue_636_negative_scaling.c').read_text()
+            h_content = (tmpdir / 'issue_636_negative_scaling.h').read_text()
+
+            self.assertIn(
+                'bool issue_636_negative_scaling_example_message_temperature_is_in_range(uint16_t value)\n'
+                '{\n'
+                '    return (value <= 3000u);\n'
+                '}',
+                c_content
+            )
+            self.assertIn('* Range: 0..3000 (4070..4100 degK)', h_content)
+
     def test_generate_c_source_is_in_phys_range_use_float(self):
         """Test that is_in_phys_range() uses float literals when --use-float is specified."""
         with tempfile.TemporaryDirectory() as _tmpdir:

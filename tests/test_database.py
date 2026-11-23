@@ -22,6 +22,7 @@ import cantools.database
 from cantools.database import Message, Signal
 from cantools.database.can.formats.dbc import dbc_loader
 from cantools.database.can.formats.dbc.dbc_writer import LongNamesConverter
+from cantools.database.conversion import BaseConversion
 from cantools.database.errors import (
     DecodeError,
     EncodeError,
@@ -2320,6 +2321,69 @@ BA_DEF_ BO_ "VFrameFormat" ENUM "StandardCAN","ExtendedCAN","J1939PG";
             data = bytes([mux, 0x11, 0x22, 0x33, 0, 0, 0, 0])
             self.assertEqual(reloaded_message.decode(data),
                              message.decode(data))
+
+    def test_as_sym_string_same_signal_name_in_several_messages(self):
+        # {SIGNALS} holds one definition per name. Signals that share a
+        # name but not a definition must keep their own, not the first one.
+        def speed(**kwargs):
+            return Signal(name='Speed', start=8, length=8, **kwargs)
+
+        messages = [
+            Message(frame_id=0x100, name='Plain', length=8,
+                    signals=[speed()]),
+            Message(frame_id=0x101, name='SamePlain', length=8,
+                    signals=[speed()]),
+            Message(frame_id=0x102, name='Scaled', length=8,
+                    signals=[speed(conversion=BaseConversion.factory(
+                        scale=0.5, offset=-10), minimum=-10, maximum=117.5,
+                        unit='km/h', comment='scaled speed', spn=84)]),
+            Message(frame_id=0x103, name='Short', length=8,
+                    signals=[Signal(name='Speed', start=20, length=4,
+                                    is_signed=True)]),
+            Message(frame_id=0x104, name='BigEndian', length=8,
+                    signals=[Signal(name='Speed', start=15, length=16,
+                                    byte_order='big_endian')]),
+            Message(frame_id=0x105, name='Choices', length=8,
+                    signals=[speed(conversion=BaseConversion.factory(
+                        scale=1, offset=0, choices={0: 'Off', 1: 'On'}))]),
+            Message(frame_id=0x106, name='OtherChoices', length=8,
+                    signals=[speed(conversion=BaseConversion.factory(
+                        scale=1, offset=0, choices={0: 'Stop', 1: 'Go'}))]),
+            Message(frame_id=0x107, name='SameChoices', length=8,
+                    signals=[speed(conversion=BaseConversion.factory(
+                        scale=1, offset=0, choices={0: 'Off', 1: 'On'}))]),
+        ]
+        db = cantools.database.Database(messages=messages)
+
+        sym = db.as_sym_string()
+        self.assertEqual(sym.count('Sig="Speed" unsigned 8'), 1)
+        self.assertEqual(sym.count('Enum='), 2)
+
+        reloaded = cantools.database.load_string(sym, 'sym')
+        for message in messages:
+            with self.subTest(message=message.name):
+                signal = message.get_signal_by_name('Speed')
+                reloaded_signal = reloaded.get_message_by_name(
+                    message.name).get_signal_by_name('Speed')
+
+                for attribute in ['start', 'length', 'byte_order', 'is_signed',
+                                  'scale', 'offset', 'minimum', 'maximum',
+                                  'unit', 'comment', 'spn', 'choices']:
+                    self.assertEqual(getattr(reloaded_signal, attribute),
+                                     getattr(signal, attribute), attribute)
+
+    def test_as_sym_string_kcd_same_signal_name_in_several_messages(self):
+        db = cantools.database.load_file('tests/files/kcd/signal_range.kcd')
+
+        reloaded = cantools.database.load_string(db.as_sym_string(), 'sym')
+        for message in db.messages:
+            signal = message.get_signal_by_name('Signal1')
+            reloaded_signal = reloaded.get_message_by_name(
+                message.name).get_signal_by_name('Signal1')
+            self.assertEqual(
+                (reloaded_signal.scale, reloaded_signal.offset,
+                 reloaded_signal.minimum, reloaded_signal.maximum),
+                (signal.scale, signal.offset, signal.minimum, signal.maximum))
 
     def test_signal_types_6_0_sym(self):
         db = cantools.database.load_file('tests/files/sym/signal-types-6.0.sym')

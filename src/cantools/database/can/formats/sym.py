@@ -235,7 +235,8 @@ class SymParser60(Parser):
                                               sig_default,
                                               sig_long_name,
                                               sig_enum,
-                                              sig_places)),
+                                              sig_places,
+                                              sig_spn)),
                             Optional('COMMENT'))
 
         symbol = Sequence('[', Any(), ']',
@@ -811,14 +812,76 @@ def _get_enum_name(signal: Signal) -> str:
     """
     return f'{_get_signal_name(signal).replace(" ", "_").replace("/", "_")[:MAX_SIGNAL_NAME_LENGTH - 1]}E'
 
-def _dump_choice(signal: Signal) -> str:
+class _SymSignals:
+    """Decides where each signal of a database is defined in a SYM file.
+
+    {SIGNALS} holds one definition per signal name, which every message
+    refers to with a Sig= line. Signals sharing that name but differing
+    in type, length, scaling, choices etc. are written as Var= lines in
+    their message instead, so they keep their own definition.
+
+    """
+
+    def __init__(self, database: InternalDatabase,
+                 sort_signals: Callable[[list[Signal]], list[Signal]] | None) -> None:
+        self.shared: dict[str, Signal] = {}
+        self._variables: set[int] = set()
+        self._enum_names: dict[int, str] = {}
+        self._enums: dict[str, Signal] = {}
+
+        for message in database.messages:
+            signals = sort_signals(message.signals) if sort_signals else message.signals
+
+            for signal in signals:
+                name = _get_signal_name(signal)
+                shared = self.shared.setdefault(name, signal)
+
+                if signal is not shared and not _same_definition(signal, shared):
+                    self._variables.add(id(signal))
+
+                if signal.choices:
+                    self._enum_names[id(signal)] = _get_unique_enum_name(
+                        signal, self._enums)
+
+    def is_variable(self, signal: Signal) -> bool:
+        return id(signal) in self._variables
+
+    def enum_name(self, signal: Signal) -> str:
+        return self._enum_names[id(signal)]
+
+    def enums(self) -> dict[str, Signal]:
+        """Returns a signal with the choices of each enum, by enum name."""
+        return self._enums
+
+
+def _same_definition(signal: Signal, other: Signal) -> bool:
+    return (_dump_signal_type(signal) == _dump_signal_type(other)
+            and _dump_signal_attributes(signal, '') == _dump_signal_attributes(other, '')
+            and signal.choices == other.choices)
+
+
+def _get_unique_enum_name(signal: Signal, enum_choices: dict[str, Signal]) -> str:
+    """Returns the name of the enum to use for the choices of a signal. Signals
+    with equal choices share an enum, and differing choices get differing
+    enum names.
+
+    """
+    enum_name = _get_enum_name(signal)
+    suffix = 1
+    while (other := enum_choices.setdefault(enum_name, signal)) is not signal:
+        if other.choices == signal.choices:
+            break
+        suffix += 1
+        enum_name = (_get_enum_name(signal)[:MAX_SIGNAL_NAME_LENGTH - len(str(suffix))]
+                     + str(suffix))
+    return enum_name
+
+
+def _dump_choice(enum_name: str, signal: Signal) -> str:
     # Example:
     # Enum=DPF_Actv_Options(0="notActive", 1="active", 2="rgnrtnNddAtmtcllyInttdActvRgnrt", 3="notAvailable")
-    if not signal.choices:
-        return ''
-
-    enum_str = f'Enum={_get_enum_name(signal)}('
-    for choice_count, (choice_number, choice_value) in enumerate(signal.choices.items()):
+    enum_str = f'Enum={enum_name}('
+    for choice_count, (choice_number, choice_value) in enumerate((signal.choices or {}).items()):
         if choice_count % 10 == 0 and choice_count != 0:
             enum_str += ',\n'
         elif choice_count > 0:
@@ -827,17 +890,9 @@ def _dump_choice(signal: Signal) -> str:
     enum_str += ')'
     return enum_str
 
-def _dump_choices(database: InternalDatabase) -> str:
-    choices = []
-    # SYM requires unique signals
-    generated_signals = set()
-    for message in database.messages:
-        for signal in message.signals:
-            if signal.name not in generated_signals:
-                generated_signals.add(signal.name)
-                new_choice = _dump_choice(signal)
-                if new_choice:
-                    choices.append(new_choice)
+def _dump_choices(sym_signals: _SymSignals) -> str:
+    choices = [_dump_choice(enum_name, signal)
+               for enum_name, signal in sym_signals.enums().items()]
 
     if choices:
         return '{ENUMS}\n' + '\n'.join(choices)
@@ -863,12 +918,14 @@ def _dump_comment(comment: str) -> str:
     # comment (allowed in DBC, KCD and ARXML) are written as spaces.
     return ' // ' + re.sub(r'\r\n?|\n', ' ', comment)
 
-def _dump_signal(signal: Signal) -> str:
-    # Example:
-    # Sig=alt_current unsigned 16 /u:A /f:0.05 /o:-1600 /max:1676.75 /d:0 // Alternator Current
-    signal_str = f'Sig="{_get_signal_name(signal)}" {_get_signal_type(signal)} {signal.length}'
+def _dump_signal_type(signal: Signal) -> str:
+    type_str = f'{_get_signal_type(signal)} {signal.length}'
     if signal.byte_order == 'big_endian':
-        signal_str += ' -m'
+        type_str += ' -m'
+    return type_str
+
+def _dump_signal_attributes(signal: Signal, enum_name: str) -> str:
+    signal_str = ''
     if signal.unit:
         signal_str += f' /u:"{signal.unit}"'
     if signal.conversion.scale != 1:
@@ -882,32 +939,40 @@ def _dump_signal(signal: Signal) -> str:
     if signal.spn and signal.spn != 0:
         signal_str += f' /spn:{signal.spn}'
     if signal.choices:
-        signal_str += f' /e:{_get_enum_name(signal)}'
+        signal_str += f' /e:{enum_name}'
     if signal.comment:
         signal_str += _dump_comment(signal.comment)
 
     return signal_str
 
-def _dump_signals(database: InternalDatabase, sort_signals: Callable[[list[Signal]], list[Signal]] | None) -> str:
-    signal_dumps = []
-    # SYM requires unique signals
-    generated_signals = set()
-    for message in database.messages:
-        if sort_signals:
-            signals = sort_signals(message.signals)
-        else:
-            signals = message.signals
-        for signal in signals:
-            if signal.name not in generated_signals:
-                generated_signals.add(signal.name)
-                signal_dumps.append(_dump_signal(signal))
+def _dump_signal(signal: Signal, sym_signals: _SymSignals) -> str:
+    # Example:
+    # Sig=alt_current unsigned 16 /u:A /f:0.05 /o:-1600 /max:1676.75 /d:0 // Alternator Current
+    enum_name = sym_signals.enum_name(signal) if signal.choices else ''
+    return (f'Sig="{_get_signal_name(signal)}" {_dump_signal_type(signal)}'
+            + _dump_signal_attributes(signal, enum_name))
+
+def _dump_variable(signal: Signal, sym_signals: _SymSignals) -> str:
+    # Example:
+    # Var=alt_current unsigned 0,16 /u:A /f:0.05 /o:-1600
+    enum_name = sym_signals.enum_name(signal) if signal.choices else ''
+    variable_str = (f'Var="{_get_signal_name(signal)}" {_get_signal_type(signal)} '
+                    f'{_convert_start(signal.start, signal.byte_order)},{signal.length}')
+    if signal.byte_order == 'big_endian':
+        variable_str += ' -m'
+    return variable_str + _dump_signal_attributes(signal, enum_name)
+
+def _dump_signals(sym_signals: _SymSignals) -> str:
+    signal_dumps = [_dump_signal(signal, sym_signals)
+                    for signal in sym_signals.shared.values()]
 
     if signal_dumps:
         return '{SIGNALS}\n' + '\n'.join(signal_dumps)
     else:
         return ''
 
-def _dump_message(message: Message, signals: list[Signal], min_frame_id: int | None, max_frame_id: int | None = None,
+def _dump_message(message: Message, signals: list[Signal], sym_signals: _SymSignals,
+                  min_frame_id: int | None, max_frame_id: int | None = None,
                   multiplexer_id: int | None = None, multiplexer_signal: Signal | None = None) -> str:
     # Example:
     # [TestMessage]
@@ -959,10 +1024,13 @@ def _dump_message(message: Message, signals: list[Signal], min_frame_id: int | N
             mux_str = mux_str.rstrip() + _dump_comment(multiplexer_signal.comment)
         message_str += mux_str + '\n'
     for signal in signals:
-        message_str += f'Sig="{_get_signal_name(signal)}" {_convert_start(signal.start, signal.byte_order)}\n'
+        if sym_signals.is_variable(signal):
+            message_str += _dump_variable(signal, sym_signals) + '\n'
+        else:
+            message_str += f'Sig="{_get_signal_name(signal)}" {_convert_start(signal.start, signal.byte_order)}\n'
     return message_str
 
-def _dump_messages(database: InternalDatabase) -> str:
+def _dump_messages(database: InternalDatabase, sym_signals: _SymSignals) -> str:
     # The loader reads one Mux= signal per message, so independent or
     # nested multiplexers would load back as a different message.
     for message in database.messages:
@@ -1006,11 +1074,11 @@ def _dump_messages(database: InternalDatabase) -> str:
                     signal_name, multiplexed_signals = next(iter(signal_tree_signal.items()))
                     is_first_message = True
                     for multiplexer_id, signals_for_multiplexer in multiplexed_signals.items():
-                        message_dumps.append(_dump_message(message, [message.get_signal_by_name(s) for s in signals_for_multiplexer] + [message.get_signal_by_name(s) for s in non_multiplexed_signals],
+                        message_dumps.append(_dump_message(message, [message.get_signal_by_name(s) for s in signals_for_multiplexer] + [message.get_signal_by_name(s) for s in non_multiplexed_signals], sym_signals,
                                                            min_frame_id if is_first_message else None, max_frame_id, multiplexer_id, message.get_signal_by_name(signal_name)))
                         is_first_message = False
         else:
-            message_dumps.append(_dump_message(message, message.signals, min_frame_id, max_frame_id))
+            message_dumps.append(_dump_message(message, message.signals, sym_signals, min_frame_id, max_frame_id))
 
         if message.senders == [SEND_MESSAGE_SENDER]:
             send_messages.extend(message_dumps)
@@ -1038,9 +1106,10 @@ def dump_string(database: InternalDatabase, *, sort_signals:type_sort_signals=SO
     sym_str = 'FormatVersion=6.0 // Do not edit this line!\n'
     sym_str += 'Title="SYM Database"\n\n'
 
-    sym_str += _dump_choices(database) + '\n\n'
-    sym_str += _dump_signals(database, sort_signals) + '\n\n'
-    sym_str += _dump_messages(database)
+    sym_signals = _SymSignals(database, sort_signals)
+    sym_str += _dump_choices(sym_signals) + '\n\n'
+    sym_str += _dump_signals(sym_signals) + '\n\n'
+    sym_str += _dump_messages(database, sym_signals)
 
     return sym_str
 
